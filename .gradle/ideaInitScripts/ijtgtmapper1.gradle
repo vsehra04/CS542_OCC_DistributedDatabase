@@ -1,0 +1,14 @@
+ext.pathMapper = [:]
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/android/lib/android.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/android/lib/android.jar")
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/lib/kotlin-stdlib-jdk8.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/lib/kotlin-stdlib-jdk8.jar")
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/gradle/lib/gradle-api-impldep-7.1.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/gradle/lib/gradle-api-impldep-7.1.jar")
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/Kotlin/lib/kotlin-plugin.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/Kotlin/lib/kotlin-plugin.jar")
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/android/lib/android-extensions-ide.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/android/lib/android-extensions-ide.jar")
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/lib/3rd-party-rt.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/lib/3rd-party-rt.jar")
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/gradle/lib/gradle-tooling-extension-api.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/gradle/lib/gradle-tooling-extension-api.jar")
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/gradle/lib/gradle-tooling-extension-impl.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/plugins/gradle/lib/gradle-tooling-extension-impl.jar")
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/lib/external-system-rt.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/lib/external-system-rt.jar")
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/lib/3rd-party.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/lib/3rd-party.jar")
+ext.pathMapper.put("C:/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/lib/util.jar", "/mnt/c/Program Files/JetBrains/IntelliJ IDEA Community Edition 2021.3.1/lib/util.jar")
+ext.pathMapper.put("<<target java executable path>>", "/usr/lib/jvm/java-11-openjdk-amd64/bin/java")
+ext.mapPath = { path -> pathMapper.get(path) ?: path }
