@@ -73,6 +73,9 @@ public class Transaction {
         this.endTimeStamp = endTimeStamp;
     }
 
+    public void setReadSet(Set<Integer> readSet){ this.readSet = readSet;}
+    public void setWriteSet(Map<Integer, Integer> writeSet){ this.writeSet = writeSet;}
+
     // Read set operations
     public void appendToReadSet(int index){
         this.readSet.add(index);
