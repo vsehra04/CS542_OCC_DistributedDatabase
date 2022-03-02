@@ -106,4 +106,7 @@ public class Transaction {
         return this.incomingEdges.contains(transactionId);
     }
 
+    public Transaction restartTransaction(){
+        return new Transaction(this.initiatingSite);
+    }
 }
