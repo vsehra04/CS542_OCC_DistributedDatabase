@@ -11,9 +11,9 @@ public class Transaction {
     // current state of the transaction
     private String state;
     // contain all the indices that are read
-    private Set<Integer> readSet;
+    private Set<List<Integer>> readSet;
     // indices of write operations and
-    private Map<Integer, Integer> writeSet;
+    private Map<List<Integer>, Integer> writeSet;
 
     //transaction start timestamp
     final private long startTimestamp;
@@ -45,11 +45,11 @@ public class Transaction {
         return state;
     }
 
-    public Set<Integer> getReadSet() {
+    public Set<List<Integer>> getReadSet() {
         return readSet;
     }
 
-    public Map<Integer, Integer> getWriteSet() {
+    public Map<List<Integer>, Integer> getWriteSet() {
         return writeSet;
     }
 
@@ -73,11 +73,11 @@ public class Transaction {
         this.endTimeStamp = endTimeStamp;
     }
 
-    public void setReadSet(Set<Integer> readSet){ this.readSet = readSet;}
-    public void setWriteSet(Map<Integer, Integer> writeSet){ this.writeSet = writeSet;}
+    public void setReadSet(Set<List<Integer>> readSet){ this.readSet = readSet;}
+    public void setWriteSet(Map<List<Integer>, Integer> writeSet){ this.writeSet = writeSet;}
 
     // Read set operations
-    public void appendToReadSet(int index){
+    public void appendToReadSet(List<Integer> index){
         this.readSet.add(index);
     }
     public void removeFromReadSet(int index){
@@ -88,7 +88,7 @@ public class Transaction {
     }
 
     // Write Set operations
-    public void appendToWriteSet(int index, int value){
+    public void appendToWriteSet(List<Integer> index, int value){
         this.writeSet.put(index, value);
     }
     public void removeFromWriteSet(int index){
