@@ -1,22 +1,34 @@
 package occ;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Set;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class TransactionManager{
 
     private DynamicConflictGraph dcg;
-    private int siteId;
+    private final int siteId;
+    private Queue<Transaction> validationQueue = new ConcurrentLinkedQueue<Transaction>();
     // current running transactions
     private Set<Transaction> currentTransactions; // Don't think thread-safe needed (confirm later)
+    private Set<Transaction> committedTransactions;
+    private Set<Transaction> semiCommittedTransactions;
 
     public void getTransaction(String transaction, ArrayList<ArrayList<Integer>> database){
         Thread thread = new Thread(new Runnable() {
             public void run() {
-                convertToTransaction(transaction, database);
+                Transaction currTransaction = convertToTransaction(transaction, database);
+                if(currTransaction != null && !Objects.equals(currTransaction.getState(), "aborted")){
+                    System.out.println(currTransaction.getState());
+                    currentTransactions.add(currTransaction);
+                    validationQueue.add(currTransaction);
+                }
+                else{
+                    if(currTransaction == null) System.out.println("Transaction aborted.");
+                    else System.out.println("Transaction with Transaction Id: " + currTransaction.getTransactionId() + " aborted.");
+                }
             }
         });
         thread.start();
@@ -25,6 +37,9 @@ public class TransactionManager{
 
     public TransactionManager(int siteId){
         this.siteId = siteId;
+        currentTransactions = ConcurrentHashMap.newKeySet();
+        semiCommittedTransactions = new HashSet<>();
+        committedTransactions = new HashSet<>();
     }
 
     private boolean performIntegrityCheck(int row, int col, ArrayList<ArrayList<Integer>> database){
@@ -35,7 +50,7 @@ public class TransactionManager{
     }
 
     // to do: add integrity check to see if the indices of read and write set are in range
-    public void convertToTransaction(String transaction, ArrayList<ArrayList<Integer>> database){
+    public Transaction convertToTransaction(String transaction, ArrayList<ArrayList<Integer>> database){
 
         String[] commands = transaction.split(";");
 
@@ -109,12 +124,14 @@ public class TransactionManager{
                         }
                     }
                     else if(command.startsWith("fail")){
+                        t.setState("aborted");
                         System.out.println("Transaction Failed");
+                        return t;
                     }
                 }
             }
         }
-
+        return t;
     }
 
     public static void main(String[] args){
