@@ -10,6 +10,7 @@ public class TransactionManager{
 
     private DynamicConflictGraph dcg;
     private int siteId;
+    public volatile boolean running = true;
     // current running transactions
     private Set<Transaction> currentTransactions; // Don't think thread-safe needed (confirm later)
 
@@ -20,6 +21,23 @@ public class TransactionManager{
             }
         });
         thread.start();
+    }
+
+    public void startValidationThread(){
+        Thread validation_thread = new Thread(new Runnable() {
+            public void run() {
+                while(running){
+                    if(!validationQueue.isEmpty()){
+                        System.out.println(validationQueue.poll());
+                    }
+                }
+            }
+        });
+        validation_thread.start();
+    }
+
+    public void stop(){
+        running = false;
     }
 
 

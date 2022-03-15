@@ -17,6 +17,7 @@ public class Site implements Runnable{
         this.siteID = siteID;
         this.database = getRandomArray(numTables, numRecords);
         this.tm = new TransactionManager(siteID);
+        tm.startValidationThread();
     }
 
     //Fetch the SiteID
@@ -73,6 +74,11 @@ public class Site implements Runnable{
         thread.start();
     }
 
+    void transactionsDone(Site s){
+        s.stop();
+        tm.stop();
+    }
+
     public static void main(String[] args){
         Site s = new Site(1, 10000, 10000);
         s.startThread();
@@ -91,7 +97,8 @@ public class Site implements Runnable{
         String t4 = "begin;read(4000,4);wait(4000);write(40,40,40)";
         s.QueueTransaction(t4, s.transactionQueue);
 
-        s.stop();
+        s.transactionsDone(s);
+
     }
 
 }
