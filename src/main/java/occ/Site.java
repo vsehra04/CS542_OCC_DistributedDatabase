@@ -64,7 +64,7 @@ public class Site implements Runnable{
         long Time0 = System.currentTimeMillis();
         long Time1;
         long runTime = 0;
-        while (runTime < 1000) { // 1000 milliseconds or 1 second
+        while (runTime < 10000) { // 1000 milliseconds or 1 second
             Time1 = System.currentTimeMillis();
             runTime = Time1 - Time0;
         }

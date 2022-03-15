@@ -6,35 +6,25 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TransactionManager implements Runnable{
+public class TransactionManager{
 
     private DynamicConflictGraph dcg;
     private int siteId;
-    private String transaction;
-    private ArrayList<ArrayList<Integer>> database;
     // current running transactions
     private Set<Transaction> currentTransactions; // Don't think thread-safe needed (confirm later)
 
-    public void run(){
-        TransactionManager tm = new TransactionManager(transaction, database);
-        tm.convertToTransaction(transaction, database);
-    }
-
     public void getTransaction(String transaction, ArrayList<ArrayList<Integer>> database){
-        TransactionManager tm = new TransactionManager(transaction, database);
-        Thread thread = new Thread(tm, "transaction");
+        Thread thread = new Thread(new Runnable() {
+            public void run() {
+                convertToTransaction(transaction, database);
+            }
+        }, "transaction");
         thread.start();
     }
 
 
     public TransactionManager(int siteId){
         this.siteId = siteId;
-    }
-
-    //Constructor for getTransaction
-    public TransactionManager(String transaction, ArrayList<ArrayList<Integer>> database){
-        this.transaction = transaction;
-        this.database = database;
     }
 
     private boolean performIntegrityCheck(int row, int col, ArrayList<ArrayList<Integer>> database){
