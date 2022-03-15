@@ -8,9 +8,9 @@ public class Site implements Runnable{
     public volatile boolean running = true;
 
     //Main Datastore : Same on all sites (replicated database)
-    private ArrayList<ArrayList<Integer>> database = new ArrayList<ArrayList<Integer>>();
+    private ArrayList<ArrayList<Integer>> database;
     private Queue<String> transactionQueue = new ConcurrentLinkedQueue<String>();
-    private TransactionManager tm;
+    private final TransactionManager tm;
 
     //Constructor
     public Site(int siteID, int numTables, int numRecords){
@@ -49,7 +49,7 @@ public class Site implements Runnable{
         while (running) {
             if(!transactionQueue.isEmpty()) {
                 //System.out.println(transactionQueue.poll());
-                tm.getTransaction(transactionQueue.poll());
+                tm.getTransaction(transactionQueue.poll(), database);
             }
         }
     }

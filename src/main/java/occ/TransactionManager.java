@@ -1,5 +1,6 @@
 package occ;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -13,15 +14,22 @@ public class TransactionManager {
     private Set<Transaction> currentTransactions; // Don't think thread-safe needed (confirm later)
 
 
-    public void getTransaction(String t){
+    public void getTransaction(String t, ArrayList<ArrayList<Integer>> database){
         System.out.println(t);
     }
     public TransactionManager(int siteId){
         this.siteId = siteId;
     }
 
+    private boolean performIntegrityCheck(int row, int col, ArrayList<ArrayList<Integer>> database){
+        int n = database.size();
+        int m = database.get(0).size();
+
+        return row < n && col < m;
+    }
+
     // to do: add integrity check to see if the indices of read and write set are in range
-    public void convertToTransaction(String transaction){
+    public void convertToTransaction(String transaction, ArrayList<ArrayList<Integer>> database){
 
         String[] commands = transaction.split(";");
 
@@ -46,7 +54,10 @@ public class TransactionManager {
                         if(matcherRow.find() && matcherCol.find()){
                             row = Integer.parseInt(matcherRow.group(0).substring(1));
                             col = Integer.parseInt(matcherCol.group(0).substring(1));
-                            t.appendToReadSet(Arrays.asList(row,col));
+                            if(!performIntegrityCheck(row, col, database)){
+                                System.out.println("Integrity Constraint Violation");
+                            }
+                            else t.appendToReadSet(Arrays.asList(row,col));
                             System.out.println(row + " " + col);
                         }
                         else{
@@ -65,6 +76,10 @@ public class TransactionManager {
                             row = Integer.parseInt(matcherRow.group(0).substring(1));
                             col = Integer.parseInt(matcherCol.group(0).substring(1,matcherCol.group(0).length()-2));
                             value = Integer.parseInt(matcherVal.group(0).substring(1,matcherVal.group(0).length()-2));
+
+                            if(!performIntegrityCheck(row, col, database)){
+                                System.out.println("Integrity Constraint Violation");
+                            }
 
                             t.appendToWriteSet(Arrays.asList(row,col),value);
                             System.out.println(row + " " + col + " " + value);
@@ -98,6 +113,6 @@ public class TransactionManager {
 
     public static void main(String[] args){
         TransactionManager t = new TransactionManager(1);
-        t.convertToTransaction("begin;read(1321,2);wait(5000);write(21,42,245)");
+//        t.convertToTransaction("begin;read(1321,2);wait(5000);write(21,42,245)");
     }
 }
