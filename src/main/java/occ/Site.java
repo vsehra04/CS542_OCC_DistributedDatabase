@@ -16,7 +16,7 @@ public class Site implements Runnable{
     public Site(int siteID, int numTables, int numRecords){
         this.siteID = siteID;
         this.database = getRandomArray(numTables, numRecords);
-        this.tm = new TransactionManager(1);
+        this.tm = new TransactionManager(siteID);
     }
 
     //Fetch the SiteID
@@ -71,22 +71,22 @@ public class Site implements Runnable{
     }
 
     public static void main(String[] args){
-        Site s = new Site(1, 100, 100);
+        Site s = new Site(1, 10000, 10000);
         Thread thread = new Thread(s, "Queue_Checker");
         thread.start();
 
 
-        String t1 = "t1";
+        String t1 = "begin;read(1000,1);wait(1000);write(10,100,10)";
         s.QueueTransaction(t1, s.transactionQueue);
 
-        String t2 = "t2";
+        String t2 = "begin;read(2000,2);wait(2000);write(20,20,200)";
         s.QueueTransaction(t2, s.transactionQueue);
-        String t3 = "t3";
+        String t3 = "begin;read(3000,3);wait(3000);write(30,30,30)";
         s.QueueTransaction(t3, s.transactionQueue);
 
         s.pause();
 
-        String t4 = "t4";
+        String t4 = "begin;read(4000,4);wait(4000);write(40,40,40)";
         s.QueueTransaction(t4, s.transactionQueue);
 
         s.stop();

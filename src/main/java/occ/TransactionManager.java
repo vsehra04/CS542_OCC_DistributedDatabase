@@ -6,19 +6,35 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TransactionManager {
+public class TransactionManager implements Runnable{
 
     private DynamicConflictGraph dcg;
     private int siteId;
+    private String transaction;
+    private ArrayList<ArrayList<Integer>> database;
     // current running transactions
     private Set<Transaction> currentTransactions; // Don't think thread-safe needed (confirm later)
 
-
-    public void getTransaction(String t, ArrayList<ArrayList<Integer>> database){
-        System.out.println(t);
+    public void run(){
+        TransactionManager tm = new TransactionManager(transaction, database);
+        tm.convertToTransaction(transaction, database);
     }
+
+    public void getTransaction(String transaction, ArrayList<ArrayList<Integer>> database){
+        TransactionManager tm = new TransactionManager(transaction, database);
+        Thread thread = new Thread(tm, "transaction");
+        thread.start();
+    }
+
+
     public TransactionManager(int siteId){
         this.siteId = siteId;
+    }
+
+    //Constructor for getTransaction
+    public TransactionManager(String transaction, ArrayList<ArrayList<Integer>> database){
+        this.transaction = transaction;
+        this.database = database;
     }
 
     private boolean performIntegrityCheck(int row, int col, ArrayList<ArrayList<Integer>> database){
@@ -74,8 +90,8 @@ public class TransactionManager {
                         int row, col, value;
                         if(matcherRow.find() && matcherCol.find() && matcherVal.find()){
                             row = Integer.parseInt(matcherRow.group(0).substring(1));
-                            col = Integer.parseInt(matcherCol.group(0).substring(1,matcherCol.group(0).length()-2));
-                            value = Integer.parseInt(matcherVal.group(0).substring(1,matcherVal.group(0).length()-2));
+                            col = Integer.parseInt(matcherCol.group(0).substring(1,matcherCol.group(0).length()-1));
+                            value = Integer.parseInt(matcherVal.group(0).substring(1,matcherVal.group(0).length()-1));
 
                             if(!performIntegrityCheck(row, col, database)){
                                 System.out.println("Integrity Constraint Violation");
