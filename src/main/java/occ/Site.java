@@ -10,7 +10,6 @@ public class Site implements Runnable{
     //Main Datastore : Same on all sites (replicated database)
     private ArrayList<ArrayList<Integer>> database;
     private Queue<String> transactionQueue = new ConcurrentLinkedQueue<String>();
-    private Thread thread;
     private final TransactionManager tm;
 
     //Constructor
@@ -18,8 +17,6 @@ public class Site implements Runnable{
         this.siteID = siteID;
         this.database = getRandomArray(numTables, numRecords);
         this.tm = new TransactionManager(siteID);
-        this.thread = new Thread();
-        this.thread.start();
     }
 
     //Fetch the SiteID
@@ -73,6 +70,9 @@ public class Site implements Runnable{
 
     public static void main(String[] args){
         Site s = new Site(1, 10000, 10000);
+        Thread thread = new Thread(s, "Queue Checker");
+        thread.start();
+
 
         String t1 = "begin;read(1000,1);wait(1000);write(10,100,10)";
         s.QueueTransaction(t1, s.transactionQueue);
