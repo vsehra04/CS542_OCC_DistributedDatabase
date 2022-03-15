@@ -18,7 +18,7 @@ public class TransactionManager{
             public void run() {
                 convertToTransaction(transaction, database);
             }
-        }, "transaction");
+        });
         thread.start();
     }
 
