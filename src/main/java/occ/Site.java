@@ -68,10 +68,14 @@ public class Site implements Runnable{
         }
     }
 
+    void startThread(){
+        Thread thread = new Thread(this, "Queue Checker");
+        thread.start();
+    }
+
     public static void main(String[] args){
         Site s = new Site(1, 10000, 10000);
-        Thread thread = new Thread(s, "Queue Checker");
-        thread.start();
+        s.startThread();
 
 
         String t1 = "begin;read(1000,1);wait(1000);write(10,100,10)";
