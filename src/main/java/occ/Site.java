@@ -16,7 +16,7 @@ public class Site implements Runnable{
     public Site(int siteID, int numTables, int numRecords){
         this.siteID = siteID;
         this.database = getRandomArray(numTables, numRecords);
-        this.tm = new TransactionManager();
+        this.tm = new TransactionManager(1);
     }
 
     //Fetch the SiteID
