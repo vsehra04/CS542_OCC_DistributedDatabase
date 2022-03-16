@@ -32,6 +32,7 @@ public class TransactionManager{
     public void getTransaction(String transaction, ArrayList<ArrayList<Integer>> database){
         Thread thread = new Thread(new Runnable() {
             public void run() {
+                activeThreads.getAndIncrement();
                 Transaction currTransaction = convertToTransaction(transaction, database);
                 if(currTransaction != null && !Objects.equals(currTransaction.getState(), "aborted")){
 //                    System.out.println(currTransaction.getState());
@@ -42,6 +43,7 @@ public class TransactionManager{
                     if(currTransaction == null) System.out.println("Transaction aborted.");
                     else System.out.println("Transaction with Transaction Id: " + currTransaction.getTransactionId() + " aborted.");
                 }
+                activeThreads.decrementAndGet();
             }
         });
         thread.start();
@@ -62,8 +64,9 @@ public class TransactionManager{
 
     public void stop(){
         System.out.println("In stop");
-        while(!validationQueue.isEmpty())continue;
-        System.out.println(validationQueue.poll());
+//        while(!validationQueue.isEmpty())continue;
+        while(activeThreads.get() != 0)continue;
+//        System.out.println(validationQueue.poll());
         System.out.println("TM validation thread Stopped");
         running = false;
     }
