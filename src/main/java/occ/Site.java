@@ -42,12 +42,14 @@ public class Site implements Runnable{
     //Used to enqueue new transactions inorder to send them to Transaction Manager
     public void QueueTransaction(String t, Queue<String> transactionQueue){
         transactionQueue.add(t);
+//        System.out.println(t);
     }
 
     //Thread to check whether the transaction queue on site is empty
     public void run() {
         while (running) {
             if(!transactionQueue.isEmpty()) {
+//                System.out.println("top: " + transactionQueue.peek());
                 tm.getTransaction(transactionQueue.poll(), database);
             }
         }
@@ -55,6 +57,8 @@ public class Site implements Runnable{
 
     //To stop queue checker thread
     public void stop(){
+        while (!transactionQueue.isEmpty())continue;
+
         running = false;
     }
 
@@ -63,7 +67,7 @@ public class Site implements Runnable{
         long Time0 = System.currentTimeMillis();
         long Time1;
         long runTime = 0;
-        while (runTime < 10000) { // 1000 milliseconds or 1 second
+        while (runTime < 3999) { // 1000 milliseconds or 1 second
             Time1 = System.currentTimeMillis();
             runTime = Time1 - Time0;
         }
@@ -96,6 +100,9 @@ public class Site implements Runnable{
 
         String t4 = "begin;read(4000,4);wait(4000);write(40,40,40)";
         s.QueueTransaction(t4, s.transactionQueue);
+
+        String t5 = "begin;read(1,1);fail();write(1,1,56)";
+        s.QueueTransaction(t5, s.transactionQueue);
 
         s.transactionsDone(s);
 
