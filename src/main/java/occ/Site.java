@@ -50,6 +50,7 @@ public class Site implements Runnable{
         while (running) {
             if(!transactionQueue.isEmpty()) {
 //                System.out.println("top: " + transactionQueue.peek());
+//                System.out.println("current trans: " + transactionQueue.peek());
                 tm.getTransaction(transactionQueue.poll(), database);
             }
         }

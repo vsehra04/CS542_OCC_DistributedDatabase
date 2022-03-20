@@ -4,12 +4,14 @@ import java.util.*;
 
 public class Transaction {
 
+    public enum STATES {ABORTED, RUNNING, RESTARTED, COMMITTED, SEMI_COMMITTED}
+
     // site where this transaction is generated
     final private int initiatingSite;
     final private UUID transactionId;
 
     // current state of the transaction
-    private String state;
+    private STATES state;
     // contain all the indices that are read
     private Set<List<Integer>> readSet;
     // indices of write operations and
@@ -29,7 +31,7 @@ public class Transaction {
         this.startTimestamp = System.nanoTime();
         this.initiatingSite = initiatingSite;
         this.transactionId = UUID.randomUUID();
-        this.state = "running";
+        this.state = STATES.RUNNING;
         this.incomingEdges = new HashSet<>();
     }
 
@@ -41,7 +43,7 @@ public class Transaction {
         return transactionId;
     }
 
-    public String getState() {
+    public STATES getState() {
         return state;
     }
 
@@ -65,7 +67,7 @@ public class Transaction {
         return incomingEdges;
     }
 
-    public void setState(String state) {
+    public void setState(STATES state) {
         this.state = state;
     }
 

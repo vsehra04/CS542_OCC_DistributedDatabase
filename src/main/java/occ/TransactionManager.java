@@ -34,7 +34,7 @@ public class TransactionManager{
             public void run() {
                 activeThreads.getAndIncrement();
                 Transaction currTransaction = convertToTransaction(transaction, database);
-                if(currTransaction != null && !Objects.equals(currTransaction.getState(), "aborted")){
+                if(currTransaction != null && !Objects.equals(currTransaction.getState(), Transaction.STATES.ABORTED)){
 //                    System.out.println(currTransaction.getState());
                     currentTransactions.add(currTransaction);
                     validationQueue.add(currTransaction);
@@ -85,6 +85,8 @@ public class TransactionManager{
         String[] commands = transaction.split(";");
 
         Transaction t = new Transaction(siteId);
+        System.out.println("New Transaction with ID: " + t.getTransactionId() + " started");
+        System.out.println(transaction);
         boolean transactionStarted = false;
         for(String command: commands){
             if(command.equals("begin")){
@@ -109,7 +111,7 @@ public class TransactionManager{
                                 System.out.println("Integrity Constraint Violation");
                             }
                             else t.appendToReadSet(Arrays.asList(row,col));
-                            System.out.println(row + " " + col);
+//                            System.out.println(row + " " + col);
                         }
                         else{
                             System.out.println("Wrong Read syntax");
@@ -133,7 +135,7 @@ public class TransactionManager{
                             }
 
                             t.appendToWriteSet(Arrays.asList(row,col),value);
-                            System.out.println(row + " " + col + " " + value);
+//                            System.out.println(row + " " + col + " " + value);
                         }
                         else{
                             System.out.println("Wrong Write syntax");
@@ -146,7 +148,7 @@ public class TransactionManager{
                         if(matcher.find()){
                             waitTime = Integer.parseInt(matcher.group(0));
                         }
-                        System.out.println(waitTime);
+//                        System.out.println(waitTime);
                         try {
                             Thread.sleep(waitTime);
                         } catch (InterruptedException e) {
@@ -154,7 +156,7 @@ public class TransactionManager{
                         }
                     }
                     else if(command.startsWith("fail")){
-                        t.setState("aborted");
+                        t.setState(Transaction.STATES.ABORTED);
                         System.out.println("Transaction Failed");
                         return t;
                     }
