@@ -33,12 +33,12 @@ public class LamportClock {
         return time.incrementAndGet();
     }
 
-    public static void main(String[] args){
-        LamportClock clock = new LamportClock(0);
-
-        System.out.println(clock.tick());
-        System.out.println(clock.tick());
-//        System.out.println(clock.updateTime(1));
-    }
+//    public static void main(String[] args){
+//        LamportClock clock = new LamportClock(0);
+//
+//        System.out.println(clock.tick());
+//        System.out.println(clock.tick());
+////        System.out.println(clock.updateTime(1));
+//    }
 
 }
