@@ -59,34 +59,34 @@ public class DynamicConflictGraph {
         }
     }
 
-    public static void main(String[] args){
-        Transaction t1 = new Transaction(1);
-        Transaction t2 = new Transaction(1);
-
-        DynamicConflictGraph dcg = new DynamicConflictGraph();
-        dcg.addNode(t1);
-        dcg.addNode(t2);
-
-       t1.appendToReadSet(Arrays.asList(1, 2));
-       t1.appendToReadSet(Arrays.asList(2, 3));
-       t1.appendToReadSet(Arrays.asList(4, 5));
-
-        t2.appendToReadSet(Arrays.asList(1, 2));
-        t2.appendToReadSet(Arrays.asList(3, 4));
-        t2.appendToReadSet(Arrays.asList(4, 5));
-
-        t1.appendToWriteSet(Arrays.asList(6, 5), 2);
-        t1.appendToWriteSet(Arrays.asList(1, 2), 2);
-        t1.appendToWriteSet(Arrays.asList(4, 5), 2);
-
-        t2.appendToWriteSet(Arrays.asList(16, 15), 2);
-        t2.appendToWriteSet(Arrays.asList(11, 12), 2);
-        t2.appendToWriteSet(Arrays.asList(14, 15), 2);
-
-
-
-        dcg.checkConflict(t1, t2);
-        dcg.adjNodes.forEach((key, value) -> System.out.println(key.getTransactionId() + ":" + value));
-    }
+//    public static void main(String[] args){
+//        Transaction t1 = new Transaction(1);
+//        Transaction t2 = new Transaction(1);
+//
+//        DynamicConflictGraph dcg = new DynamicConflictGraph();
+//        dcg.addNode(t1);
+//        dcg.addNode(t2);
+//
+//       t1.appendToReadSet(Arrays.asList(1, 2));
+//       t1.appendToReadSet(Arrays.asList(2, 3));
+//       t1.appendToReadSet(Arrays.asList(4, 5));
+//
+//        t2.appendToReadSet(Arrays.asList(1, 2));
+//        t2.appendToReadSet(Arrays.asList(3, 4));
+//        t2.appendToReadSet(Arrays.asList(4, 5));
+//
+//        t1.appendToWriteSet(Arrays.asList(6, 5), 2);
+//        t1.appendToWriteSet(Arrays.asList(1, 2), 2);
+//        t1.appendToWriteSet(Arrays.asList(4, 5), 2);
+//
+//        t2.appendToWriteSet(Arrays.asList(16, 15), 2);
+//        t2.appendToWriteSet(Arrays.asList(11, 12), 2);
+//        t2.appendToWriteSet(Arrays.asList(14, 15), 2);
+//
+//
+//
+//        dcg.checkConflict(t1, t2);
+//        dcg.adjNodes.forEach((key, value) -> System.out.println(key.getTransactionId() + ":" + value));
+//    }
 
 }
