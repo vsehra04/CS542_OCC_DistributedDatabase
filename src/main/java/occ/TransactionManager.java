@@ -20,7 +20,7 @@ public class TransactionManager{
     private Set<Transaction> committedTransactions;
     private Set<Transaction> semiCommittedTransactions;
     private AtomicInteger activeThreads;
-
+    private LamportClock clock;
     public TransactionManager(int siteId){
         this.siteId = siteId;
         currentTransactions = ConcurrentHashMap.newKeySet();
@@ -29,11 +29,16 @@ public class TransactionManager{
         activeThreads = new AtomicInteger(0);
     }
 
+    public LamportClock getClock() {
+        return clock;
+    }
+
     public void getTransaction(String transaction, ArrayList<ArrayList<Integer>> database){
         Thread thread = new Thread(new Runnable() {
             public void run() {
                 activeThreads.getAndIncrement();
                 Transaction currTransaction = convertToTransaction(transaction, database);
+                clock.tick();
                 if(currTransaction != null && !Objects.equals(currTransaction.getState(), Transaction.STATES.ABORTED)){
 //                    System.out.println(currTransaction.getState());
                     currentTransactions.add(currTransaction);
@@ -49,7 +54,8 @@ public class TransactionManager{
         thread.start();
     }
 
-    public void startValidationThread(){
+    public void startValidationThread(LamportClock siteClock){
+        this.clock = siteClock;
         Thread validation_thread = new Thread(new Runnable() {
             public void run() {
                 while(running){
@@ -68,6 +74,7 @@ public class TransactionManager{
         while(activeThreads.get() != 0)continue;
 //        System.out.println(validationQueue.poll());
         System.out.println("TM validation thread Stopped");
+        System.out.println("TM Time:" + clock.getTime());
         running = false;
     }
 
@@ -84,7 +91,9 @@ public class TransactionManager{
 
         String[] commands = transaction.split(";");
 
-        Transaction t = new Transaction(siteId);
+//        Transaction t = new Transaction(siteId);
+        clock.tick();
+        Transaction t = new Transaction(siteId, clock.getTime());
         System.out.println("New Transaction with ID: " + t.getTransactionId() + " started");
         System.out.println(transaction);
         boolean transactionStarted = false;

@@ -11,13 +11,14 @@ public class Site implements Runnable{
     private ArrayList<ArrayList<Integer>> database;
     private Queue<String> transactionQueue = new ConcurrentLinkedQueue<String>();
     private final TransactionManager tm;
-
+    private LamportClock clock;
     //Constructor
     public Site(int siteID, int numTables, int numRecords){
         this.siteID = siteID;
         this.database = getRandomArray(numTables, numRecords);
         this.tm = new TransactionManager(siteID);
-        tm.startValidationThread();
+        clock = new LamportClock(0);
+        tm.startValidationThread(clock);
     }
 
     //Fetch the SiteID
@@ -41,6 +42,7 @@ public class Site implements Runnable{
 
     //Used to enqueue new transactions inorder to send them to Transaction Manager
     public void QueueTransaction(String t, Queue<String> transactionQueue){
+        clock.tick();
         transactionQueue.add(t);
 //        System.out.println(t);
     }
@@ -51,6 +53,7 @@ public class Site implements Runnable{
             if(!transactionQueue.isEmpty()) {
 //                System.out.println("top: " + transactionQueue.peek());
 //                System.out.println("current trans: " + transactionQueue.peek());
+                clock.tick();
                 tm.getTransaction(transactionQueue.poll(), database);
             }
         }
@@ -59,7 +62,6 @@ public class Site implements Runnable{
     //To stop queue checker thread
     public void stop(){
         while (!transactionQueue.isEmpty())continue;
-
         running = false;
     }
 
@@ -82,6 +84,7 @@ public class Site implements Runnable{
     void transactionsDone(Site s){
         s.stop();
         tm.stop();
+        System.out.println("Site Time:" + clock.getTime());
     }
 
     public static void main(String[] args){

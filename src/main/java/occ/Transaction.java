@@ -25,10 +25,11 @@ public class Transaction {
     // list with all incoming edges in the conflict graph
     private Set<UUID> incomingEdges;
 
-    public Transaction(int initiatingSite) {
+    public Transaction(int initiatingSite, int time) {
         this.readSet = new HashSet<>();
         this.writeSet = new HashMap<>();
-        this.startTimestamp = System.nanoTime();
+//        this.startTimestamp = System.nanoTime();
+        this.startTimestamp = time;
         this.initiatingSite = initiatingSite;
         this.transactionId = UUID.randomUUID();
         this.state = STATES.RUNNING;
@@ -111,7 +112,7 @@ public class Transaction {
         return this.incomingEdges.contains(transactionId);
     }
 
-    public Transaction restartTransaction(){
-        return new Transaction(this.initiatingSite);
-    }
+//    public Transaction restartTransaction(){
+//        return new Transaction(this.initiatingSite);
+//    }
 }
