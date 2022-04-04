@@ -35,15 +35,19 @@ public class DynamicConflictGraph {
         //WS(T1) conflicts WS(T2) --> Abort
         if(!write_intersection.isEmpty()){
             //abort
+            abortTransaction(t1);
             removeNode(t1);
             System.out.println("Write Conflict");
+            return;
         }
 
         //If T1 -> T2 and T2 -> T1 -> Abort
         else if(!t1_intersection.isEmpty() && !t2_intersection.isEmpty()){
             //abort
             removeNode(t1);
+            abortTransaction(t1);
             System.out.println("Two way conflict");
+            return;
         }
 
         //RS(T1) conflicts WS(T2) T1 -> T2
@@ -57,6 +61,32 @@ public class DynamicConflictGraph {
             addEdge(t2, t1);
             System.out.println("WS(T1) conflicts RS(T2) T2 -> T1");
         }
+
+    }
+
+    private void abortTransaction(Transaction t1) {
+        t1.setState(Transaction.STATES.ABORTED);
+    }
+
+    public boolean checkCycle(Transaction t1){
+        Set<Transaction> inStack = new HashSet<>();
+        return dfs(t1, inStack);
+    }
+
+    private boolean dfs(Transaction t1, Set<Transaction> inStack) {
+        inStack.add(t1);
+        for(Transaction t: this.adjNodes.get(t1)){
+            if(inStack.contains(t))return true;
+            if(dfs(t, inStack))return true;
+        }
+        inStack.remove(t1);
+        return false;
+    }
+
+    public boolean validateTransaction(Transaction validationTrans) {
+//        System.out.println("here");
+        // check conflicts with all overlapping transactions
+        return validationTrans.getState() != Transaction.STATES.ABORTED;
     }
 
 //    public static void main(String[] args){

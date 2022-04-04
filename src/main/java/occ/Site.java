@@ -8,15 +8,16 @@ public class Site implements Runnable{
     public volatile boolean running = true;
 
     //Main Datastore : Same on all sites (replicated database)
-    private ArrayList<ArrayList<Integer>> database;
+    private Database database;
     private Queue<String> transactionQueue = new ConcurrentLinkedQueue<String>();
     private final TransactionManager tm;
     private LamportClock clock;
     //Constructor
     public Site(int siteID, int numTables, int numRecords){
         this.siteID = siteID;
-        this.database = getRandomArray(numTables, numRecords);
-        this.tm = new TransactionManager(siteID);
+//        this.database = getRandomArray(numTables, numRecords);
+        this.database = new Database(numTables, numRecords);
+        this.tm = new TransactionManager(siteID, this.database);
         clock = new LamportClock(0);
         tm.startValidationThread(clock);
     }
@@ -26,19 +27,7 @@ public class Site implements Runnable{
         return siteID;
     }
 
-    //Generated a random database (2D)
-    public ArrayList<ArrayList<Integer>> getRandomArray(int numTables, int numRecords){
-        ArrayList<ArrayList<Integer>> arr = new ArrayList<ArrayList<Integer>>();
-        for(int i=1; i<=numTables; i++) {
-            Random rnd = new Random(i*50);
-            ArrayList<Integer> temp = new ArrayList<Integer>();
-            for (int j = 0; j < numRecords; j++) {
-                temp.add(rnd.nextInt(100));
-            }
-            arr.add(temp);
-        }
-        return arr;
-    }
+
 
     //Used to enqueue new transactions inorder to send them to Transaction Manager
     public void QueueTransaction(String t, Queue<String> transactionQueue){
@@ -54,7 +43,7 @@ public class Site implements Runnable{
 //                System.out.println("top: " + transactionQueue.peek());
 //                System.out.println("current trans: " + transactionQueue.peek());
                 clock.tick();
-                tm.getTransaction(transactionQueue.poll(), database);
+                tm.getTransaction(transactionQueue.poll(), database.getDb());
             }
         }
     }
