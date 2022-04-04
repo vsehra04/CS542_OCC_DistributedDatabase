@@ -8,10 +8,11 @@ public class DynamicConflictGraph {
     //To store EndTime of Committed and Semi-Committed Transactions (Descending Order)
     ArrayList<Transaction> dcgNodes = new ArrayList<>();
 
-    LamportClock lc = new LamportClock();
+    private LamportClock lc;
 
-    DynamicConflictGraph(){
+    DynamicConflictGraph(LamportClock lc){
         this.adjNodes = new HashMap<>();
+        this.lc = lc;
     }
 
     public void addNode(Transaction t){
@@ -69,8 +70,6 @@ public class DynamicConflictGraph {
             dcgNodes.add(t1);
             System.out.println("WS(T1) conflicts RS(T2) T2 -> T1");
         }
-
-        lc.tick();
     }
 
     public void getConcurrentTransactions(Transaction t){
@@ -90,6 +89,7 @@ public class DynamicConflictGraph {
                }
            }
         }
+        lc.tick();
     }
 
 //    public static void main(String[] args){
