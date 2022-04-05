@@ -21,12 +21,14 @@ public class TransactionManager{
     private Set<Transaction> semiCommittedTransactions;
     private AtomicInteger activeThreads;
     private LamportClock clock;
-    public TransactionManager(int siteId){
+    private Database database;
+    public TransactionManager(int siteId, Database db){
         this.siteId = siteId;
         currentTransactions = ConcurrentHashMap.newKeySet();
         semiCommittedTransactions = new HashSet<>();
         committedTransactions = new HashSet<>();
         activeThreads = new AtomicInteger(0);
+        this.database = db;
     }
 
     public LamportClock getClock() {
@@ -56,16 +58,51 @@ public class TransactionManager{
 
     public void startValidationThread(LamportClock siteClock){
         this.clock = siteClock;
+        this.dcg = new DynamicConflictGraph(this.clock);
         Thread validation_thread = new Thread(new Runnable() {
             public void run() {
                 while(running){
                     if(!validationQueue.isEmpty()){
-                        System.out.println(validationQueue.poll().getTransactionId());
+                        Transaction validationTrans = validationQueue.poll();
+                        System.out.println(validationTrans.getTransactionId());
+                        // call dcg function to check if valid -> if false -> we abort restart the transaction, else put in semi-committed state
+                        clock.tick();
+                        if(dcg.validateTransaction(validationTrans)){
+                            semiCommittedTransactions.add(validationTrans);
+                            validationTrans.setState(Transaction.STATES.SEMI_COMMITTED);
+                            // send this transaction to all sites for validation (will need a thread that monitors all the incoming messages)
+                        }
+                        else{
+                            // if the transaction's siteId is different, we will send an abort message to the initial site
+                            if(validationTrans.getInitiatingSite() != siteId){
+                                continue;
+                                // send abort to site with the given site id
+                            }
+                            else{
+                                Transaction restartAbortedTransaction = new Transaction(siteId, clock.getTime());
+                                updateWriteSet(restartAbortedTransaction);
+                            }
+
+                        }
+                        currentTransactions.remove(validationTrans);
                     }
                 }
             }
         });
         validation_thread.start();
+    }
+
+    private void updateWriteSet(Transaction transaction) {
+        ArrayList<ArrayList<Integer>> db = this.database.getDb();
+        Map<List<Integer>, Integer> writeSet = transaction.getWriteSet();
+
+        for(List<Integer> li: writeSet.keySet()){
+            writeSet.replace(li, db.get(li.get(0)).get(li.get(1)));
+        }
+        transaction.setWriteSet(writeSet);
+        clock.tick();
+        currentTransactions.add(transaction);
+        validationQueue.add(transaction);
     }
 
     public void stop(){
@@ -175,8 +212,8 @@ public class TransactionManager{
         return t;
     }
 
-    public static void main(String[] args){
-        TransactionManager t = new TransactionManager(1);
-//        t.convertToTransaction("begin;read(1321,2);wait(5000);write(21,42,245)");
-    }
+//    public static void main(String[] args){
+//        TransactionManager t = new TransactionManager(1);
+////        t.convertToTransaction("begin;read(1321,2);wait(5000);write(21,42,245)");
+//    }
 }
