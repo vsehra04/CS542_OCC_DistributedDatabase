@@ -81,21 +81,23 @@ public class Site implements Runnable{
         s.startThread();
 
 
-        String t1 = "begin;read(1000,1);wait(1000);write(10,100,10)";
+        String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
         s.QueueTransaction(t1, s.transactionQueue);
 
-        String t2 = "begin;read(2000,2);wait(2000);write(20,20,200)";
+        String t2 = "begin;read(2000,2);wait(2000);read(20,100);write(1,2,100)";
         s.QueueTransaction(t2, s.transactionQueue);
-        String t3 = "begin;read(3000,3);wait(3000);write(30,30,30)";
+        String t3 = "begin;read(3000,3);wait(3000);write(1000,1,30);read(1,2)";
         s.QueueTransaction(t3, s.transactionQueue);
 
-        s.pause();
-
-        String t4 = "begin;read(4000,4);wait(4000);write(40,40,40)";
+        String t4 = "begin;read(4000,4);wait(3020);write(1000,1,30)";
         s.QueueTransaction(t4, s.transactionQueue);
 
-        String t5 = "begin;read(1,1);fail();write(1,1,56)";
-        s.QueueTransaction(t5, s.transactionQueue);
+        s.pause();
+//
+
+//
+//        String t5 = "begin;read(1,1);fail();write(1,1,56)";
+//        s.QueueTransaction(t5, s.transactionQueue);
 
         s.transactionsDone(s);
 

@@ -16,6 +16,7 @@ public class DynamicConflictGraph {
     }
 
     public void addNode(Transaction t){
+        System.out.println("Node added");
         adjNodes.put(t, new ArrayList<>());
         lc.tick();
     }
@@ -34,6 +35,7 @@ public class DynamicConflictGraph {
     public void checkConflict(Transaction t1, Transaction t2){
 
         System.out.println(t1.getWriteSet() + "T2 : "  + t2.getWriteSet());
+        System.out.println(t1.getReadSet() + "T2 : "  + t2.getReadSet());
         Set<List<Integer>> t1_intersection = new HashSet<List<Integer>>(t1.getReadSet());
         t1_intersection.retainAll(t2.getWriteSet().keySet());
 
@@ -58,18 +60,17 @@ public class DynamicConflictGraph {
             System.out.println("Two way conflict");
             return;
         }
-
         //RS(T1) conflicts WS(T2) T1 -> T2
         else if(!t1_intersection.isEmpty()){
+//            dcgNodes.add(t1);
             addEdge(t1, t2);
-            dcgNodes.add(t1);
             System.out.println("RS(T1) conflicts WS(T2) T1 -> T2");
         }
 
         //WS(T1) conflicts RS(T2) T2 -> T1
         else if(!t2_intersection.isEmpty()){
+//            dcgNodes.add(t1);
             addEdge(t2, t1);
-            dcgNodes.add(t1);
             System.out.println("WS(T1) conflicts RS(T2) T2 -> T1");
         }
     }
@@ -77,7 +78,8 @@ public class DynamicConflictGraph {
     public void getConcurrentTransactions(Transaction t){
         System.out.println(t.getTransactionId());
         if(dcgNodes.isEmpty()){
-            dcgNodes.add(t);
+//            dcgNodes.add(t);
+            return;
         }
         else {
            for(int i=dcgNodes.size()-1; i>=0; i--){
@@ -102,14 +104,18 @@ public class DynamicConflictGraph {
 
     public boolean checkCycle(Transaction t1){
         Set<Transaction> inStack = new HashSet<>();
+        System.out.println("In cycle detection");
         boolean cycle = dfs(t1, inStack);
         if(cycle){
             abortTransaction(t1);
         }
+        if(!cycle)dcgNodes.add(t1);
+        adjNodes.forEach((key, value) -> System.out.println(key.getTransactionId() + ":" + value));
         return cycle;
     }
 
     private boolean dfs(Transaction t1, Set<Transaction> inStack) {
+        if(this.adjNodes.get(t1) == null)return false;
         inStack.add(t1);
         for(Transaction t: this.adjNodes.get(t1)){
             if(inStack.contains(t))return true;
@@ -122,8 +128,9 @@ public class DynamicConflictGraph {
     public boolean validateTransaction(Transaction validationTrans) {
 //        System.out.println("here");
         // check conflicts with all overlapping transactions
+        addNode(validationTrans);
         getConcurrentTransactions(validationTrans);
-        if(validationTrans.getState() != Transaction.STATES.ABORTED)return checkCycle(validationTrans);
+        if(validationTrans.getState() != Transaction.STATES.ABORTED)return !checkCycle(validationTrans);
         return validationTrans.getState() != Transaction.STATES.ABORTED;
     }
 

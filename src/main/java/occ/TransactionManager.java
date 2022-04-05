@@ -44,6 +44,7 @@ public class TransactionManager{
                 if(currTransaction != null && !Objects.equals(currTransaction.getState(), Transaction.STATES.ABORTED)){
 //                    System.out.println(currTransaction.getState());
                     currentTransactions.add(currTransaction);
+                    System.out.println("Transaction with TID: " + currTransaction.getTransactionId() + " added to validation queue");
                     validationQueue.add(currTransaction);
                 }
                 else{
@@ -59,27 +60,36 @@ public class TransactionManager{
     public void startValidationThread(LamportClock siteClock){
         this.clock = siteClock;
         this.dcg = new DynamicConflictGraph(this.clock);
+
         Thread validation_thread = new Thread(new Runnable() {
             public void run() {
+//                activeThreads.getAndIncrement();
                 while(running){
                     if(!validationQueue.isEmpty()){
                         Transaction validationTrans = validationQueue.poll();
-                        System.out.println(validationTrans.getTransactionId());
+                        System.out.println(validationTrans.getState());
                         // call dcg function to check if valid -> if false -> we abort restart the transaction, else put in semi-committed state
                         clock.tick();
                         if(dcg.validateTransaction(validationTrans)){
                             semiCommittedTransactions.add(validationTrans);
                             validationTrans.setState(Transaction.STATES.SEMI_COMMITTED);
+                            validationTrans.setEndTimeStamp(clock.getTime());
+                            System.out.println("End TS: " + validationTrans.getEndTimeStamp());
                             // send this transaction to all sites for validation (will need a thread that monitors all the incoming messages)
                         }
                         else{
+                            System.out.println("In aborted state");
                             // if the transaction's siteId is different, we will send an abort message to the initial site
                             if(validationTrans.getInitiatingSite() != siteId){
                                 continue;
                                 // send abort to site with the given site id
                             }
                             else{
+                                System.out.println("Transaction with id: " + validationTrans.getTransactionId() + " aborted during validation due to conflicts at TS: "+ clock.getTime());
                                 Transaction restartAbortedTransaction = new Transaction(siteId, clock.getTime());
+                                System.out.println("Transaction restarted with TID: " + restartAbortedTransaction.getTransactionId());
+                                restartAbortedTransaction.setReadSet(validationTrans.getReadSet());
+                                restartAbortedTransaction.setWriteSet(validationTrans.getWriteSet());
                                 updateWriteSet(restartAbortedTransaction);
                             }
 
@@ -87,9 +97,11 @@ public class TransactionManager{
                         currentTransactions.remove(validationTrans);
                     }
                 }
+//                activeThreads.getAndDecrement();
             }
         });
         validation_thread.start();
+
     }
 
     private void updateWriteSet(Transaction transaction) {
@@ -102,6 +114,7 @@ public class TransactionManager{
         transaction.setWriteSet(writeSet);
         clock.tick();
         currentTransactions.add(transaction);
+        System.out.println("Transaction with TID: " + transaction.getTransactionId() + " added to validation queue");
         validationQueue.add(transaction);
     }
 
