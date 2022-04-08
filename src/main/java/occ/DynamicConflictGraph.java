@@ -1,17 +1,19 @@
 package occ;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DynamicConflictGraph {
     private Map<Transaction, List<Transaction>> adjNodes;
 
     //To store EndTime of Committed and Semi-Committed Transactions (Descending Order)
-    ArrayList<Transaction> dcgNodes = new ArrayList<>();
+    CopyOnWriteArrayList<Transaction> dcgNodes = new CopyOnWriteArrayList<>();
 
     private LamportClock lc;
 
     DynamicConflictGraph(LamportClock lc){
-        this.adjNodes = new HashMap<>();
+        this.adjNodes = new ConcurrentHashMap<>();
         this.lc = lc;
     }
 
