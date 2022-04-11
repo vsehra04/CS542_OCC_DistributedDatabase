@@ -1,13 +1,17 @@
 package occ;
 
-public class Packet {
+import java.io.Serializable;
 
-    public enum MESSAGES {ABORT, ACK}
+public class Packet implements Serializable {
+
+    public enum MESSAGES {ABORT, ACK, SHUT_DOWN}
 
     private long time;
     private Transaction transaction;
     private MESSAGES message;
     private int siteId;
+
+    public Packet() {}
 
     public Packet(long time, Transaction transaction, MESSAGES message, int siteId) {
         this.time = time;
