@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Packet implements Serializable {
 
-    public enum MESSAGES {ABORT, ACK, SHUT_DOWN}
+    public enum MESSAGES {ABORT, ACK, SHUT_DOWN, GLOBAL_COMMIT}
 
     private long time;
     private Transaction transaction;
@@ -12,6 +12,13 @@ public class Packet implements Serializable {
     private int siteId;
 
     public Packet() {}
+
+    public Packet(Packet p){
+        this.time = p.getTime();
+        this.transaction = p.getTransaction();
+        this.message = p.getMessage();
+        this.siteId = p.getSiteId();
+    }
 
     public Packet(long time, Transaction transaction, MESSAGES message, int siteId) {
         this.time = time;

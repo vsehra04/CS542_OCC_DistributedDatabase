@@ -4,13 +4,31 @@ import java.net.*;
 import java.io.*;
 
 public class MultiServer {
+    private enum SERVER_STATUS {RUNNING, SHUTDOWN}
     private ServerSocket serverSocket;
+    private final int siteId;
+    private final TransactionManager serverTM;
+    private final int port;
+    private int currentConnections;
+    private SERVER_STATUS serverStatus;
 
-    public void start(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
-        // we should probably make this 4 connections (we are assuming no site failure)
-        while (true) {
+    public MultiServer(int siteId, TransactionManager serverTM, int port) {
+        this.siteId = siteId;
+        this.serverTM = serverTM;
+        this.port = port;
+        this.currentConnections = 0;
+        this.serverStatus = SERVER_STATUS.RUNNING;
+    }
+    // my question: should server be on a new thread? because if we are in the main thread, we will never be able to go to the next line
+    // until we connect clients, and to connect clients, we need to go to the next line, therefore deadlocked?!
+    public void start() throws IOException {
+        serverSocket = new ServerSocket(this.port);
+
+        System.out.println("Site " + this.siteId + " listening for new connections");
+        // we should probably make this 4 connections (we are assuming no site failure) --> done
+        while (currentConnections < 3) {
             new ClientHandler(serverSocket.accept()).start();
+            currentConnections++;
         }
     }
 
@@ -32,9 +50,7 @@ public class MultiServer {
                 outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
                 inputStream = new ObjectInputStream(clientSocket.getInputStream());
                 while (true){
-                    Packet request = new Packet();
-                    request = (Packet)inputStream.readObject();
-
+                    Packet request = new Packet((Packet)inputStream.readObject());
                     if(request.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
                     else{
                         System.out.println("Process the request");

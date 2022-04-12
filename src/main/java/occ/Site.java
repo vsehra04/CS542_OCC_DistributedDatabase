@@ -1,5 +1,6 @@
 package occ;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -12,22 +13,25 @@ public class Site implements Runnable{
     private Queue<String> transactionQueue = new ConcurrentLinkedQueue<String>();
     private final TransactionManager tm;
     private LamportClock clock;
+    private final MultiServer server;
+    private Map<Integer, Client> clientList;
+
     //Constructor
-    public Site(int siteID, int numTables, int numRecords){
+    public Site(int siteID, int numTables, int numRecords, int port){
         this.siteID = siteID;
 //        this.database = getRandomArray(numTables, numRecords);
         this.database = new Database(numTables, numRecords);
         this.tm = new TransactionManager(siteID, this.database);
-        clock = new LamportClock(0);
-        tm.startValidationThread(clock);
+        this.clock = new LamportClock(0);
+//        this.client = new Client(ip, port, siteID, tm);
+        this.server = new MultiServer(siteID, tm, port);
+//        tm.startValidationThread(clock);
     }
 
     //Fetch the SiteID
     public int getSiteID() {
         return siteID;
     }
-
-
 
     //Used to enqueue new transactions inorder to send them to Transaction Manager
     public void QueueTransaction(String t, Queue<String> transactionQueue){
@@ -76,8 +80,35 @@ public class Site implements Runnable{
         System.out.println("Site Time:" + clock.getTime());
     }
 
+    Map<Integer, Client> connectClientToServers(List<String> ipList, List<Integer> portList){
+        Map<Integer, Client> clientMap = new HashMap<>();
+
+        for(int i=0;i<clientList.size();i++){
+            Client c = new Client(ipList.get(i), portList.get(i), i+1, this.siteID, this.tm);
+            c.startConnection();
+            clientMap.put(i+1, c);
+        }
+
+        return clientMap;
+    }
+
+    public void setClientList(Map<Integer, Client> clientList) {
+        this.clientList = clientList;
+    }
+    public void startTMOperations(){
+        this.tm.startValidationThread(this.clock);
+        tm.setClientMap(this.clientList);
+        tm.setServer(this.server);
+    }
     public static void main(String[] args){
-        Site s = new Site(1, 10000, 10000);
+        Site s = new Site(1, 10000, 10000, 5700);
+        // to do: write server.start() which will listen for connections -> this probably has to be done in a new thread
+        // for client -> write connectToServer which will keep on trying to connect to server until it gets connected
+        s.setClientList(s.connectClientToServers(Arrays.asList("1", "2", "3"), Arrays.asList(1,2,3)));
+        // once all the clients are connected to different servers start tm thread and send tm all these values
+        s.startTMOperations();
+
+
         s.startThread();
 
 

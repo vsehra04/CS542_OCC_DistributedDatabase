@@ -22,6 +22,9 @@ public class TransactionManager{
     private AtomicInteger activeThreads;
     private LamportClock clock;
     private Database database;
+    private Map<Integer, Client> clientMap;
+    private MultiServer server;
+
     public TransactionManager(int siteId, Database db){
         this.siteId = siteId;
         currentTransactions = ConcurrentHashMap.newKeySet();
@@ -29,6 +32,14 @@ public class TransactionManager{
         committedTransactions = new HashSet<>();
         activeThreads = new AtomicInteger(0);
         this.database = db;
+    }
+
+    public void setClientMap(Map<Integer, Client> clientMap) {
+        this.clientMap = clientMap;
+    }
+
+    public void setServer(MultiServer server) {
+        this.server = server;
     }
 
     public LamportClock getClock() {

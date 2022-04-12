@@ -5,15 +5,35 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.*;
 
-public class Client {
+public class Client implements Runnable{
     private Socket clientSocket;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
+    private boolean run;
+    private final int connectingSite;
+    private final int initiatingSite;
+    private final TransactionManager clientTM;
+    private final String ip;
+    private final int port;
 
-    public void startConnection(String ip, int port) throws IOException {
-        clientSocket = new Socket(ip, port);
-        outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
-        inputStream = new ObjectInputStream(clientSocket.getInputStream());
+    public Client(String ip, int port, int siteId, int initiatingSite,TransactionManager tm){
+        this.clientTM = tm;
+        this.connectingSite = siteId;
+        this.ip = ip;
+        this.port = port;
+        this.initiatingSite = initiatingSite;
+    }
+
+    public void startConnection() {
+        run = true;
+        try {
+            clientSocket = new Socket(this.ip, this.port);
+            outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
+            inputStream = new ObjectInputStream(clientSocket.getInputStream());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+//        this.sendMessage(new Packet())
     }
 
     public Packet sendMessage(Packet packet) {
@@ -33,5 +53,30 @@ public class Client {
         outputStream.close();
         inputStream.close();
         clientSocket.close();
+        run = false;
+    }
+
+    @Override
+    public void run() {
+        // message listener
+        while(run){
+            try {
+                Packet response = new Packet((Packet)inputStream.readObject());
+
+                if(response.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
+                else if(response.getMessage() == Packet.MESSAGES.ABORT){
+                    System.out.println("Abort this transaction in my site");
+                }
+                else if(response.getMessage() == Packet.MESSAGES.ACK){
+                    System.out.println("This will only happen at the initiating site, and here we will add +1 to the semi-commited map");
+                }
+                else{
+                    // GLOBAL COMMIT
+                    System.out.println("convert a semi-committed transaction to committed");
+                }
+            } catch (IOException | ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
