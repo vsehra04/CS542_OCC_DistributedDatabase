@@ -4,7 +4,7 @@ import java.io.Serializable;
 
 public class Packet implements Serializable {
 
-    public enum MESSAGES {ABORT, ACK, SHUT_DOWN, GLOBAL_COMMIT}
+    public enum MESSAGES {ABORT, ACK, SHUT_DOWN, GLOBAL_COMMIT, VALIDATE}
 
     private long time;
     private Transaction transaction;

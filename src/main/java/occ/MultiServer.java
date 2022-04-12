@@ -63,8 +63,7 @@ public class MultiServer implements Runnable{
                     if(request.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
                     else{
                         System.out.println("Process the request");
-                        // 1 solution here is that we can pass the transaction manager to the server, and perform actions from here
-                        // other can be to pass the server to tm, i believe 1 would work
+
                     }
                 }
             } catch (IOException | ClassNotFoundException e) {
