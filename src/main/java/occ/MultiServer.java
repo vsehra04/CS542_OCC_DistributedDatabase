@@ -62,7 +62,8 @@ public class MultiServer implements Runnable{
                     Packet request = new Packet((Packet)inputStream.readObject());
                     if(request.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
                     else{
-                        System.out.println("Process the request");
+                        System.out.println("Ack message received from a site for transaction: " + request.getTransaction().getTransactionId());
+                        // acknowledgement message received
 
                     }
                 }

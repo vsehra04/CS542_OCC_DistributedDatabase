@@ -18,7 +18,7 @@ public class TransactionManager{
     // current running transactions
     private Set<Transaction> currentTransactions; // Don't think thread-safe needed (confirm later)
     private Set<Transaction> committedTransactions;
-    private Set<Transaction> semiCommittedTransactions;
+    private Map<Transaction, Integer> semiCommittedTransactions;
     private AtomicInteger activeThreads;
     private LamportClock clock;
     private Database database;
@@ -28,7 +28,7 @@ public class TransactionManager{
     public TransactionManager(int siteId, Database db){
         this.siteId = siteId;
         currentTransactions = ConcurrentHashMap.newKeySet();
-        semiCommittedTransactions = new HashSet<>();
+        semiCommittedTransactions = new HashMap<>();
         committedTransactions = new HashSet<>();
         activeThreads = new AtomicInteger(0);
         this.database = db;
@@ -82,8 +82,9 @@ public class TransactionManager{
                         // call dcg function to check if valid -> if false -> we abort restart the transaction, else put in semi-committed state
                         clock.tick();
                         if(dcg.validateTransaction(validationTrans)){
-                            semiCommittedTransactions.add(validationTrans);
+                            semiCommittedTransactions.put(validationTrans, semiCommittedTransactions.getOrDefault(validationTrans, 0)+1);
                             validationTrans.setState(Transaction.STATES.SEMI_COMMITTED);
+
                             validationTrans.setEndTimeStamp(clock.getTime());
                             System.out.println("End TS: " + validationTrans.getEndTimeStamp());
                             // send this transaction to all sites for validation (will need a thread that monitors all the incoming messages)
