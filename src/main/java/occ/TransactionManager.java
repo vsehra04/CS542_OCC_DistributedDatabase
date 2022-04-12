@@ -35,7 +35,10 @@ public class TransactionManager{
         abortSet = new HashSet<>();
         this.database = db;
     }
-
+    public int incrementAndGetSemiCommittedTransactions(Transaction transaction){
+        semiCommittedTransactions.put(transaction, semiCommittedTransactions.get(transaction)+1);
+        return semiCommittedTransactions.get(transaction);
+    }
     public void setClientMap(Map<Integer, Client> clientMap) {
         this.clientMap = clientMap;
     }
@@ -99,7 +102,6 @@ public class TransactionManager{
                             else{
                                 //Send all
                             }
-                            // send this transaction to all sites for validation (will need a thread that monitors all the incoming messages)
                         }
                         else{
                             System.out.println("In aborted state");
