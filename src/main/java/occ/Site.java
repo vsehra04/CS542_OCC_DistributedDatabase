@@ -80,6 +80,15 @@ public class Site implements Runnable{
         System.out.println("Site Time:" + clock.getTime());
     }
 
+    public void startServer(){
+        try {
+            server.startServer();
+        }
+        catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     Map<Integer, Client> connectClientToServers(List<String> ipList, List<Integer> portList){
         Map<Integer, Client> clientMap = new HashMap<>();
 
@@ -100,16 +109,25 @@ public class Site implements Runnable{
         tm.setClientMap(this.clientList);
         tm.setServer(this.server);
     }
+
+    public void setupServerClient(Site s, List<String> ipList, List<Integer> portList){
+        s.startServer();
+        s.setClientList(s.connectClientToServers(ipList, portList));
+        s.startTMOperations();
+        s.startThread();
+    }
+
     public static void main(String[] args){
         Site s = new Site(1, 10000, 10000, 5700);
         // to do: write server.start() which will listen for connections -> this probably has to be done in a new thread
         // for client -> write connectToServer which will keep on trying to connect to server until it gets connected
-        s.setClientList(s.connectClientToServers(Arrays.asList("1", "2", "3"), Arrays.asList(1,2,3)));
+//        s.startServer();
+//        s.setClientList(s.connectClientToServers(Arrays.asList("1", "2", "3"), Arrays.asList(1,2,3)));
         // once all the clients are connected to different servers start tm thread and send tm all these values
-        s.startTMOperations();
+//        s.startTMOperations();
+//        s.startThread();
 
-
-        s.startThread();
+        s.setupServerClient(s, Arrays.asList("1", "2", "3"), Arrays.asList(1,2,3));
 
 
         String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
