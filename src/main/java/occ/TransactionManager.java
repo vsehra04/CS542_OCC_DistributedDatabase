@@ -101,13 +101,15 @@ public class TransactionManager{
                             }
                             else{
                                 //Send all
+                                server.sendAll(Packet.MESSAGES.VALIDATE, validationTrans);
                             }
                         }
                         else{
                             System.out.println("In aborted state");
                             // if the transaction's siteId is different, we will send an abort message to the initial site
                             if(validationTrans.getInitiatingSite() != siteId){
-                                continue;
+                                System.out.println("Sending abort to all sites");
+                                server.sendAll(Packet.MESSAGES.ABORT, validationTrans);
                                 // send abort to site with the given site id
                             }
                             else{

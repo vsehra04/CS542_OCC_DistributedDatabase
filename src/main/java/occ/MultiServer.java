@@ -89,16 +89,23 @@ public class MultiServer{
         });
     }
 
-    private void sendAll(Packet.MESSAGES message, Transaction transaction) {
+    private void sendPacket(Transaction transaction, Packet.MESSAGES message){
+        for(int i=0;i<clientSocket.size();i++){
+            try {
+                outputStream.get(i).writeObject(new Packet(serverTM.getClock().getTime(), transaction, message, siteId));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+    public void sendAll(Packet.MESSAGES message, Transaction transaction) {
         if(message == Packet.MESSAGES.GLOBAL_COMMIT){
             System.out.println("SENDING GLOBAL COMMIT TO ALL SITES");
-            for(int i=0;i<clientSocket.size();i++){
-                try {
-                    outputStream.get(i).writeObject(new Packet(serverTM.getClock().getTime(), transaction, message, siteId));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+            sendPacket(transaction, message);
+        }
+        else if(message == Packet.MESSAGES.VALIDATE){
+            System.out.println("SENDING VALIDATE TO ALL SITES");
+            sendPacket(transaction, message);
         }
     }
 
