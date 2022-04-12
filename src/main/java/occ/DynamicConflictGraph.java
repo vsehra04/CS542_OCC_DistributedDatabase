@@ -136,6 +136,11 @@ public class DynamicConflictGraph {
         return validationTrans.getState() != Transaction.STATES.ABORTED;
     }
 
+    public void removeTransaction(Transaction t){
+        dcgNodes.remove(t);
+        removeNode(t);
+    }
+
 //    public static void main(String[] args){
 //        Transaction t1 = new Transaction(1);
 //        Transaction t2 = new Transaction(1);

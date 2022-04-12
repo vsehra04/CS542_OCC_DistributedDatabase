@@ -63,17 +63,21 @@ public class Client implements Runnable{
         while(run){
             try {
                 Packet response = new Packet((Packet)inputStream.readObject());
-
                 if(response.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
+                else if(response.getMessage() == Packet.MESSAGES.VALIDATE){
+                    System.out.println("Add to Validation Queue");
+                    clientTM.getClock().updateTime((int) response.getTime());
+                    clientTM.addToValidationQueue(response.getTransaction());
+                }
                 else if(response.getMessage() == Packet.MESSAGES.ABORT){
                     System.out.println("Abort this transaction in my site");
+                    clientTM.getClock().updateTime((int) response.getTime());
+                    clientTM.abortTransaction(response.getTransaction());
                 }
-                else if(response.getMessage() == Packet.MESSAGES.ACK){
-                    System.out.println("This will only happen at the initiating site, and here we will add +1 to the semi-commited map");
-                }
-                else{
-                    // GLOBAL COMMIT
-                    System.out.println("convert a semi-committed transaction to committed");
+                else if(response.getMessage() == Packet.MESSAGES.GLOBAL_COMMIT){
+                    System.out.println("Global Commit the transaction");
+                    clientTM.getClock().updateTime((int) response.getTime());
+                    clientTM.globalCommit(response.getTransaction());
                 }
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();

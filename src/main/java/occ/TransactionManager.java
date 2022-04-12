@@ -19,6 +19,7 @@ public class TransactionManager{
     private Set<Transaction> currentTransactions; // Don't think thread-safe needed (confirm later)
     private Set<Transaction> committedTransactions;
     private Map<Transaction, Integer> semiCommittedTransactions;
+    private Set<Transaction> abortSet;
     private AtomicInteger activeThreads;
     private LamportClock clock;
     private Database database;
@@ -31,6 +32,7 @@ public class TransactionManager{
         semiCommittedTransactions = new HashMap<>();
         committedTransactions = new HashSet<>();
         activeThreads = new AtomicInteger(0);
+        abortSet = new HashSet<>();
         this.database = db;
     }
 
@@ -81,12 +83,22 @@ public class TransactionManager{
                         System.out.println(validationTrans.getState());
                         // call dcg function to check if valid -> if false -> we abort restart the transaction, else put in semi-committed state
                         clock.tick();
+                        //Transaction present in abort set
+                        if(abortSet.contains(validationTrans)){ abortSet.remove(validationTrans); continue;}
                         if(dcg.validateTransaction(validationTrans)){
                             semiCommittedTransactions.put(validationTrans, semiCommittedTransactions.getOrDefault(validationTrans, 0)+1);
                             validationTrans.setState(Transaction.STATES.SEMI_COMMITTED);
 
                             validationTrans.setEndTimeStamp(clock.getTime());
                             System.out.println("End TS: " + validationTrans.getEndTimeStamp());
+                            if(validationTrans.getInitiatingSite() != siteId){
+                                System.out.println("Sending ack to initiating site");
+                                Client client = clientMap.get(siteId);
+                                client.sendMessage(new Packet(clock.getTime(), validationTrans, Packet.MESSAGES.ACK, siteId));
+                            }
+                            else{
+                                //Send all
+                            }
                             // send this transaction to all sites for validation (will need a thread that monitors all the incoming messages)
                         }
                         else{
@@ -235,6 +247,28 @@ public class TransactionManager{
             }
         }
         return t;
+    }
+
+    public void addToValidationQueue(Transaction t){
+        validationQueue.add(t);
+    }
+
+    public void abortTransaction(Transaction t){
+        if(semiCommittedTransactions.containsKey(t)){
+            System.out.println("Removing from semi-committed transactions");
+            semiCommittedTransactions.remove(t);
+            dcg.removeTransaction(t);
+        }
+        else{
+            System.out.println("Adding to abort set");
+            abortSet.add(t);
+        }
+    }
+
+    public void globalCommit(Transaction t){
+        System.out.println("Global Committing :" + t.getTransactionId());
+        semiCommittedTransactions.remove(t);
+        committedTransactions.add(t);
     }
 
 //    public static void main(String[] args){
