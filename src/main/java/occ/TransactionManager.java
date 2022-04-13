@@ -273,6 +273,12 @@ public class TransactionManager{
         System.out.println("Global Committing :" + t.getTransactionId());
         semiCommittedTransactions.remove(t);
         committedTransactions.add(t);
+
+        t.getWriteSet().forEach((key, val) -> database.setDbElement(key.get(0), key.get(1), val));
+        clock.tick();
+        t.setEndTimeStamp(clock.getTime());
+        dcg.dcgNodes.remove(t);
+        dcg.dcgNodes.add(t);
     }
 
 //    public static void main(String[] args){
