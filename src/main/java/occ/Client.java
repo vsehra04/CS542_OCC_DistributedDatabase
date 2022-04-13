@@ -73,6 +73,16 @@ public class Client implements Runnable{
                     System.out.println("Abort this transaction in my site");
                     clientTM.getClock().updateTime((int) response.getTime());
                     clientTM.abortTransaction(response.getTransaction());
+                    if(clientTM.getSiteId() == response.getTransaction().getInitiatingSite()){
+                        // restart transaction
+                        Transaction t = response.getTransaction();
+                        System.out.println("Transaction with id: " + t.getTransactionId() + " aborted during global validation at TS: "+ clientTM.getClock().getTime());
+                        Transaction restartAbortedTransaction = new Transaction(clientTM.getSiteId(), clientTM.getClock().getTime());
+                        System.out.println("Transaction restarted with TID: " + restartAbortedTransaction.getTransactionId());
+                        restartAbortedTransaction.setReadSet(t.getReadSet());
+                        restartAbortedTransaction.setWriteSet(t.getWriteSet());
+                        clientTM.updateWriteSet(restartAbortedTransaction);
+                    }
                 }
                 else if(response.getMessage() == Packet.MESSAGES.GLOBAL_COMMIT){
                     System.out.println("Global Commit the transaction");

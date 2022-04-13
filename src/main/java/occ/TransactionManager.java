@@ -13,6 +13,7 @@ public class TransactionManager{
 
     public volatile boolean running = true;
 
+
     private final int siteId;
     private Queue<Transaction> validationQueue = new ConcurrentLinkedQueue<Transaction>();
     // current running transactions
@@ -26,6 +27,9 @@ public class TransactionManager{
     private Map<Integer, Client> clientMap;
     private MultiServer server;
 
+    public int getSiteId() {
+        return siteId;
+    }
     public TransactionManager(int siteId, Database db){
         this.siteId = siteId;
         currentTransactions = ConcurrentHashMap.newKeySet();
@@ -96,11 +100,11 @@ public class TransactionManager{
                             System.out.println("End TS: " + validationTrans.getEndTimeStamp());
                             if(validationTrans.getInitiatingSite() != siteId){
                                 System.out.println("Sending ack to initiating site");
-                                Client client = clientMap.get(siteId);
+                                Client client = clientMap.get(validationTrans.getInitiatingSite());
                                 client.sendMessage(new Packet(clock.getTime(), validationTrans, Packet.MESSAGES.ACK, siteId));
                             }
                             else{
-                                //Send all
+                                //Send all for validation
                                 server.sendAll(Packet.MESSAGES.VALIDATE, validationTrans);
                             }
                         }
@@ -113,6 +117,7 @@ public class TransactionManager{
                                 // send abort to site with the given site id
                             }
                             else{
+                                // local abort and restart
                                 System.out.println("Transaction with id: " + validationTrans.getTransactionId() + " aborted during validation due to conflicts at TS: "+ clock.getTime());
                                 Transaction restartAbortedTransaction = new Transaction(siteId, clock.getTime());
                                 System.out.println("Transaction restarted with TID: " + restartAbortedTransaction.getTransactionId());
@@ -132,7 +137,7 @@ public class TransactionManager{
 
     }
 
-    private void updateWriteSet(Transaction transaction) {
+    public void updateWriteSet(Transaction transaction) {
         ArrayList<ArrayList<Integer>> db = this.database.getDb();
         Map<List<Integer>, Integer> writeSet = transaction.getWriteSet();
 
