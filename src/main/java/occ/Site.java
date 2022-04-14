@@ -96,9 +96,14 @@ public class Site implements Runnable{
 
     Map<Integer, Client> connectClientToServers(List<String> ipList, List<Integer> portList){
         Map<Integer, Client> clientMap = new HashMap<>();
+        List<Integer> serverList = new ArrayList<>();
 
-        for(int i=0;i<clientList.size();i++){
-            Client c = new Client(ipList.get(i), portList.get(i), i+1, this.siteID, this.tm);
+        for(int i=1;i<=4;i++){
+            if(i != this.siteID)serverList.add(i);
+        }
+
+        for(int i=0;i<3;i++){
+            Client c = new Client(ipList.get(i), portList.get(i), serverList.get(i), this.siteID, this.tm);
             c.startConnection();
             clientMap.put(i+1, c);
         }
@@ -115,46 +120,46 @@ public class Site implements Runnable{
         tm.setServer(this.server);
     }
 
-    public void setupServerClient(Site s, List<String> ipList, List<Integer> portList){
-        s.startServer();
-        s.setClientList(s.connectClientToServers(ipList, portList));
-        s.startTMOperations();
-        s.startThread();
+    public void setupServerClient(List<String> ipList, List<Integer> portList){
+        startServer();
+        setClientList(connectClientToServers(ipList, portList));
+        startTMOperations();
+        startThread();
     }
 
-    public static void main(String[] args){
-        Site s = new Site(1, 10000, 10000, 5700);
-        // to do: write server.start() which will listen for connections -> this probably has to be done in a new thread
-        // for client -> write connectToServer which will keep on trying to connect to server until it gets connected
-//        s.startServer();
-//        s.setClientList(s.connectClientToServers(Arrays.asList("1", "2", "3"), Arrays.asList(1,2,3)));
-        // once all the clients are connected to different servers start tm thread and send tm all these values
-//        s.startTMOperations();
-//        s.startThread();
-
-        s.setupServerClient(s, Arrays.asList("1", "2", "3"), Arrays.asList(1,2,3));
-
-
-        String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
-        s.QueueTransaction(t1, s.transactionQueue);
-
-        String t2 = "begin;read(2000,2);wait(2000);read(20,100);write(1,2,100)";
-        s.QueueTransaction(t2, s.transactionQueue);
-        String t3 = "begin;read(3000,3);wait(3000);write(1000,1,30);read(1,2)";
-        s.QueueTransaction(t3, s.transactionQueue);
-
-        String t4 = "begin;read(4000,4);wait(3020);write(1000,1,30)";
-        s.QueueTransaction(t4, s.transactionQueue);
-
-        s.pause();
+//    public static void main(String[] args){
+//        Site s = new Site(1, 10000, 10000, 5700);
+//        // to do: write server.start() which will listen for connections -> this probably has to be done in a new thread
+//        // for client -> write connectToServer which will keep on trying to connect to server until it gets connected
+////        s.startServer();
+////        s.setClientList(s.connectClientToServers(Arrays.asList("1", "2", "3"), Arrays.asList(1,2,3)));
+//        // once all the clients are connected to different servers start tm thread and send tm all these values
+////        s.startTMOperations();
+////        s.startThread();
 //
-
+////        s.setupServerClient(s, Arrays.asList("1", "2", "3"), Arrays.asList(1,2,3));
 //
-//        String t5 = "begin;read(1,1);fail();write(1,1,56)";
-//        s.QueueTransaction(t5, s.transactionQueue);
-
-        s.transactionsDone(s);
-
-    }
+//
+//        String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
+//        s.QueueTransaction(t1, s.transactionQueue);
+//
+//        String t2 = "begin;read(2000,2);wait(2000);read(20,100);write(1,2,100)";
+//        s.QueueTransaction(t2, s.transactionQueue);
+//        String t3 = "begin;read(3000,3);wait(3000);write(1000,1,30);read(1,2)";
+//        s.QueueTransaction(t3, s.transactionQueue);
+//
+//        String t4 = "begin;read(4000,4);wait(3020);write(1000,1,30)";
+//        s.QueueTransaction(t4, s.transactionQueue);
+//
+//        s.pause();
+////
+//
+////
+////        String t5 = "begin;read(1,1);fail();write(1,1,56)";
+////        s.QueueTransaction(t5, s.transactionQueue);
+//
+//        s.transactionsDone(s);
+//
+//    }
 
 }
