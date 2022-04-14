@@ -63,7 +63,7 @@ public class Site implements Runnable{
         long Time0 = System.currentTimeMillis();
         long Time1;
         long runTime = 0;
-        while (runTime < 3999) { // 1000 milliseconds or 1 second
+        while (runTime < 3000) { // 1000 milliseconds or 1 second
             Time1 = System.currentTimeMillis();
             runTime = Time1 - Time0;
         }
@@ -121,7 +121,7 @@ public class Site implements Runnable{
     }
 
     public void setupServerClient(List<String> ipList, List<Integer> portList){
-        startServer();
+//        startServer();
         setClientList(connectClientToServers(ipList, portList));
         startTMOperations();
         startThread();

@@ -40,13 +40,15 @@ public class MultiServer{
                     while (currentConnections < 3) {
 //                        new ClientHandler(serverSocket.accept()).start();
                         startListeningToClient(serverSocket.accept());
-                        currentConnections++;
+                        System.out.println("Site " + siteId + " accepted a connection");
+                        ++currentConnections;
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         });
+        thread.start();
     }
 
     private void startListeningToClient(Socket cs) {
@@ -86,6 +88,7 @@ public class MultiServer{
 
             }
         });
+        thread.start();
     }
 
     private void sendPacket(Transaction transaction, Packet.MESSAGES message){

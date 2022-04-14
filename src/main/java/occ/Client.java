@@ -28,7 +28,7 @@ public class Client implements Runnable{
         run = true;
         try {
             clientSocket = new Socket();
-            clientSocket.connect(new InetSocketAddress(ip, port), 10000);
+            clientSocket.connect(new InetSocketAddress(ip, port), 5000);
             outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
             inputStream = new ObjectInputStream(clientSocket.getInputStream());
         } catch (IOException e) {
