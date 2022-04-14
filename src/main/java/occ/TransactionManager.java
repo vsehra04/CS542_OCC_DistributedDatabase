@@ -19,7 +19,8 @@ public class TransactionManager{
     // current running transactions
     private Set<Transaction> currentTransactions; // Don't think thread-safe needed (confirm later)
     private Set<Transaction> committedTransactions;
-    private Map<Transaction, Integer> semiCommittedTransactions;
+    private Map<UUID, Integer> semiCommittedTransactions;
+    private Map<UUID, Transaction> transactionIdMap;
     private Set<Transaction> abortSet;
     private AtomicInteger activeThreads;
     private LamportClock clock;
@@ -33,15 +34,16 @@ public class TransactionManager{
     public TransactionManager(int siteId, Database db){
         this.siteId = siteId;
         currentTransactions = ConcurrentHashMap.newKeySet();
-        semiCommittedTransactions = new HashMap<>();
+        semiCommittedTransactions = new ConcurrentHashMap<>();
+        transactionIdMap = new HashMap<>();
         committedTransactions = new HashSet<>();
         activeThreads = new AtomicInteger(0);
         abortSet = new HashSet<>();
         this.database = db;
     }
     public int incrementAndGetSemiCommittedTransactions(Transaction transaction){
-        semiCommittedTransactions.put(transaction, semiCommittedTransactions.get(transaction)+1);
-        return semiCommittedTransactions.get(transaction);
+        semiCommittedTransactions.put(transaction.getTransactionId(), (semiCommittedTransactions.get(transaction.getTransactionId())+1));
+        return semiCommittedTransactions.get(transaction.getTransactionId());
     }
     public void setClientMap(Map<Integer, Client> clientMap) {
         this.clientMap = clientMap;
@@ -93,7 +95,8 @@ public class TransactionManager{
                         //Transaction present in abort set
                         if(abortSet.contains(validationTrans)){ abortSet.remove(validationTrans); continue;}
                         if(dcg.validateTransaction(validationTrans)){
-                            semiCommittedTransactions.put(validationTrans, semiCommittedTransactions.getOrDefault(validationTrans, 0)+1);
+                            transactionIdMap.put(validationTrans.getTransactionId(), validationTrans);
+                            semiCommittedTransactions.put(validationTrans.getTransactionId(), semiCommittedTransactions.getOrDefault(validationTrans.getTransactionId(), 0));
                             validationTrans.setState(Transaction.STATES.SEMI_COMMITTED);
 
                             validationTrans.setEndTimeStamp(clock.getTime());
@@ -266,6 +269,7 @@ public class TransactionManager{
         if(semiCommittedTransactions.containsKey(t)){
             System.out.println("Removing from semi-committed transactions");
             semiCommittedTransactions.remove(t);
+            transactionIdMap.remove(t.getTransactionId());
             dcg.removeTransaction(t);
         }
         else{
@@ -277,6 +281,7 @@ public class TransactionManager{
     public void globalCommit(Transaction t){
         System.out.println("Global Committing :" + t.getTransactionId());
         semiCommittedTransactions.remove(t);
+        transactionIdMap.remove(t.getTransactionId());
         committedTransactions.add(t);
 
         t.getWriteSet().forEach((key, val) -> database.setDbElement(key.get(0), key.get(1), val));

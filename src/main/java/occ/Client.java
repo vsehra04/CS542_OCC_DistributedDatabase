@@ -31,6 +31,8 @@ public class Client implements Runnable{
             clientSocket.connect(new InetSocketAddress(ip, port), 5000);
             outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
             inputStream = new ObjectInputStream(clientSocket.getInputStream());
+            Thread thread = new Thread(this, "clientThread");
+            thread.start();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -63,9 +65,10 @@ public class Client implements Runnable{
         while(running){
             try {
                 Packet response = new Packet((Packet)inputStream.readObject());
+                System.out.println("Site id: " + this.initiatingSite);
                 if(response.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
                 else if(response.getMessage() == Packet.MESSAGES.VALIDATE){
-                    System.out.println("Add to Validation Queue");
+                    System.out.println("Add to Validation Queue ");
                     clientTM.getClock().updateTime((int) response.getTime());
                     clientTM.addToValidationQueue(response.getTransaction());
                 }

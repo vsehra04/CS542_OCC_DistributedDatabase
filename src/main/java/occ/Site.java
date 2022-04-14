@@ -16,6 +16,11 @@ public class Site implements Runnable{
     private final MultiServer server;
     private Map<Integer, Client> clientList;
 
+
+    public Queue<String> getTransactionQueue() {
+        return transactionQueue;
+    }
+
     //Constructor
     public Site(int siteID, int numTables, int numRecords, int port){
         this.siteID = siteID;
@@ -34,9 +39,9 @@ public class Site implements Runnable{
     }
 
     //Used to enqueue new transactions inorder to send them to Transaction Manager
-    public void QueueTransaction(String t, Queue<String> transactionQueue){
+    public void QueueTransaction(String t){
         clock.tick();
-        transactionQueue.add(t);
+        this.transactionQueue.add(t);
 //        System.out.println(t);
     }
 
@@ -59,11 +64,11 @@ public class Site implements Runnable{
     }
 
     //Pause the main thread for 1s
-    public static void pause(){
+    public static void pause(long timeout){
         long Time0 = System.currentTimeMillis();
         long Time1;
         long runTime = 0;
-        while (runTime < 3000) { // 1000 milliseconds or 1 second
+        while (runTime < timeout) { // 1000 milliseconds or 1 second
             Time1 = System.currentTimeMillis();
             runTime = Time1 - Time0;
         }

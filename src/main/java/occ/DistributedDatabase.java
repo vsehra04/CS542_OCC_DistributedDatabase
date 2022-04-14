@@ -16,7 +16,7 @@ public class DistributedDatabase {
         s3.startServer();
         s4.startServer();
 
-        Site.pause();
+        Site.pause(2000);
 
         s1.setupServerClient(Arrays.asList("172.27.201.130","172.27.201.130","172.27.201.130"), Arrays.asList(5701, 5702, 5703));
 
@@ -30,13 +30,17 @@ public class DistributedDatabase {
         s4.setupServerClient(Arrays.asList("172.27.201.130","172.27.201.130","172.27.201.130"), Arrays.asList(5701, 5702, 5700));
 
 
+        String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
+        s1.QueueTransaction(t1);
 
-        Site.pause();
+        Site.pause(30000);
 
         s1.transactionsDone(s1);
         s2.transactionsDone(s2);
         s3.transactionsDone(s3);
         s4.transactionsDone(s4);
+
+//        while(true)continue;
     }
 
 }

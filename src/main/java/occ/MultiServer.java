@@ -71,8 +71,9 @@ public class MultiServer{
                             System.out.println("Ack message received from a site for transaction: " + request.getTransaction().getTransactionId());
                             // acknowledgement message received
                             int count = serverTM.incrementAndGetSemiCommittedTransactions(request.getTransaction());
+                            System.out.println("COUNT: " + count);
                             serverTM.getClock().updateTime((int) request.getTime());
-                            if (count == 3){
+                            if (count == 4){
                                 sendAll(Packet.MESSAGES.GLOBAL_COMMIT, request.getTransaction());
                             }
                         }

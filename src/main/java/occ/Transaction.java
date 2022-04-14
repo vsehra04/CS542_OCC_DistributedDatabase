@@ -1,8 +1,9 @@
 package occ;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Transaction {
+public class Transaction implements Serializable {
 
     public enum STATES {ABORTED, RUNNING, RESTARTED, COMMITTED, SEMI_COMMITTED}
 
