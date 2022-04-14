@@ -29,6 +29,8 @@ public class DistributedDatabase {
 
         s4.setupServerClient(Arrays.asList("172.27.201.130","172.27.201.130","172.27.201.130"), Arrays.asList(5701, 5702, 5700));
 
+
+
         Site.pause();
 
         s1.transactionsDone(s1);

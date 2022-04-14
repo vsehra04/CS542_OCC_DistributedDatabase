@@ -9,7 +9,7 @@ public class Client implements Runnable{
     private Socket clientSocket;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
-    private boolean run;
+    private boolean running;
     private final int connectingSite;
     private final int initiatingSite;
     private final TransactionManager clientTM;
@@ -25,7 +25,7 @@ public class Client implements Runnable{
     }
 
     public void startConnection() {
-        run = true;
+        running = true;
         try {
             clientSocket = new Socket();
             clientSocket.connect(new InetSocketAddress(ip, port), 5000);
@@ -54,13 +54,13 @@ public class Client implements Runnable{
         outputStream.close();
         inputStream.close();
         clientSocket.close();
-        run = false;
+        running = false;
     }
 
     @Override
     public void run() {
         // message listener
-        while(run){
+        while(running){
             try {
                 Packet response = new Packet((Packet)inputStream.readObject());
                 if(response.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
