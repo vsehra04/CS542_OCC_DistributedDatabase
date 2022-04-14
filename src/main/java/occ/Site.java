@@ -78,6 +78,11 @@ public class Site implements Runnable{
         s.stop();
         tm.stop();
         System.out.println("Site Time:" + clock.getTime());
+        try {
+            server.stop();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void startServer(){

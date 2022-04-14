@@ -76,10 +76,9 @@ public class MultiServer{
                         }
                     }
 
-                    os.close();
-                    is.close();
-                    cs.close();
-
+//                    os.close();
+//                    is.close();
+//                    cs.close();
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
@@ -119,6 +118,11 @@ public class MultiServer{
 
     public void stop() throws IOException {
         serverSocket.close();
+        for(int i=0;i<inputStream.size();i++){
+            inputStream.get(i).close();
+            outputStream.get(i).close();
+            clientSocket.get(i).close();
+        }
     }
 
 //    private static class ClientHandler extends Thread {
