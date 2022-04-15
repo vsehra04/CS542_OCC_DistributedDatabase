@@ -18,16 +18,18 @@ public class DistributedDatabase {
 
         Site.pause(2000);
 
-        s1.setupServerClient(Arrays.asList("172.27.201.130","172.27.201.130","172.27.201.130"), Arrays.asList(5701, 5702, 5703));
+        int server1 = 5700, server2 = 5701, server3 = 5702, server4 = 5704;
+
+        s1.setupServerClient(Arrays.asList("127.0.0.1","127.0.0.1","127.0.0.1"), Arrays.asList(server2, server3, server4));
 
 
-        s2.setupServerClient(Arrays.asList("172.27.201.130","172.27.201.130","172.27.201.130"), Arrays.asList(5700, 5702, 5703));
+        s2.setupServerClient(Arrays.asList("127.0.0.1","127.0.0.1","127.0.0.1"), Arrays.asList(server1, server3, server4));
 
 
-        s3.setupServerClient(Arrays.asList("172.27.201.130","172.27.201.130","172.27.201.130"), Arrays.asList(5701, 5700, 5703));
+        s3.setupServerClient(Arrays.asList("127.0.0.1","127.0.0.1","127.0.0.1"), Arrays.asList(server1, server2, server4));
 
 
-        s4.setupServerClient(Arrays.asList("172.27.201.130","172.27.201.130","172.27.201.130"), Arrays.asList(5701, 5702, 5700));
+        s4.setupServerClient(Arrays.asList("127.0.0.1","127.0.0.1","127.0.0.1"), Arrays.asList(server1, server2, server3));
 
 
         String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";

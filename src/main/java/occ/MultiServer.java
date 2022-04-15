@@ -1,5 +1,6 @@
 package occ;
 
+import javax.swing.plaf.IconUIResource;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -67,13 +68,14 @@ public class MultiServer{
                     while (true){
                         Packet request = new Packet((Packet)is.readObject());
                         if(request.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
-                        else{
-                            System.out.println("Ack message received from a site for transaction: " + request.getTransaction().getTransactionId());
+                        else if(request.getMessage() == Packet.MESSAGES.ACK){
+                            System.out.println("Ack message received from a site ID " + request.getSiteId() + " for transaction: " + request.getTransaction().getTransactionId());
                             // acknowledgement message received
+                            System.out.println("Server site ID : " + siteId);
                             int count = serverTM.incrementAndGetSemiCommittedTransactions(request.getTransaction());
                             System.out.println("COUNT: " + count);
                             serverTM.getClock().updateTime((int) request.getTime());
-                            if (count == 4){
+                            if (count == 3){
                                 sendAll(Packet.MESSAGES.GLOBAL_COMMIT, request.getTransaction());
                             }
                         }

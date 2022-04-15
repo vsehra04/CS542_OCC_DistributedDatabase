@@ -19,7 +19,7 @@ public class TransactionManager{
     // current running transactions
     private Set<Transaction> currentTransactions; // Don't think thread-safe needed (confirm later)
     private Set<Transaction> committedTransactions;
-    private Map<UUID, Integer> semiCommittedTransactions;
+    private Map<UUID, AtomicInteger> semiCommittedTransactions;
     private Map<UUID, Transaction> transactionIdMap;
     private Set<Transaction> abortSet;
     private AtomicInteger activeThreads;
@@ -42,8 +42,11 @@ public class TransactionManager{
         this.database = db;
     }
     public int incrementAndGetSemiCommittedTransactions(Transaction transaction){
-        semiCommittedTransactions.put(transaction.getTransactionId(), (semiCommittedTransactions.get(transaction.getTransactionId())+1));
-        return semiCommittedTransactions.get(transaction.getTransactionId());
+        //semiCommittedTransactions.put(transaction.getTransactionId(), (semiCommittedTransactions.get(transaction.getTransactionId()).getAndIncrement()));
+        System.out.println("Site ID : " + siteId + " getting : " + semiCommittedTransactions.get(transaction.getTransactionId()).get());
+        semiCommittedTransactions.get(transaction.getTransactionId()).getAndIncrement();
+        System.out.println("Site ID : " + siteId + " after incrementing : " + semiCommittedTransactions.get(transaction.getTransactionId()).get());
+        return semiCommittedTransactions.get(transaction.getTransactionId()).get();
     }
     public void setClientMap(Map<Integer, Client> clientMap) {
         this.clientMap = clientMap;
@@ -96,13 +99,13 @@ public class TransactionManager{
                         if(abortSet.contains(validationTrans)){ abortSet.remove(validationTrans); continue;}
                         if(dcg.validateTransaction(validationTrans)){
                             transactionIdMap.put(validationTrans.getTransactionId(), validationTrans);
-                            semiCommittedTransactions.put(validationTrans.getTransactionId(), semiCommittedTransactions.getOrDefault(validationTrans.getTransactionId(), 0));
+                            semiCommittedTransactions.put(validationTrans.getTransactionId(), semiCommittedTransactions.getOrDefault(validationTrans.getTransactionId(), new AtomicInteger(0)));
                             validationTrans.setState(Transaction.STATES.SEMI_COMMITTED);
 
                             validationTrans.setEndTimeStamp(clock.getTime());
                             System.out.println("End TS: " + validationTrans.getEndTimeStamp());
                             if(validationTrans.getInitiatingSite() != siteId){
-                                System.out.println("Sending ack to initiating site");
+                                System.out.println("Sending ack to initiating site : " + validationTrans.getInitiatingSite());
                                 Client client = clientMap.get(validationTrans.getInitiatingSite());
                                 client.sendMessage(new Packet(clock.getTime(), validationTrans, Packet.MESSAGES.ACK, siteId));
                             }

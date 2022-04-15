@@ -110,7 +110,7 @@ public class Site implements Runnable{
         for(int i=0;i<3;i++){
             Client c = new Client(ipList.get(i), portList.get(i), serverList.get(i), this.siteID, this.tm);
             c.startConnection();
-            clientMap.put(i+1, c);
+            clientMap.put(serverList.get(i), c);
         }
 
         return clientMap;
