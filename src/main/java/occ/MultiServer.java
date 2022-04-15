@@ -115,6 +115,7 @@ public class MultiServer{
     }
     public void sendAll(Packet.MESSAGES message, Transaction transaction) {
         if(message == Packet.MESSAGES.GLOBAL_COMMIT){
+            serverTM.globalCommit(transaction);
             System.out.println("SENDING GLOBAL COMMIT TO ALL SITES FOR TRANSACTION ID: " + transaction.getTransactionId());
             sendPacket(transaction, message);
         }

@@ -302,6 +302,7 @@ public class TransactionManager{
         t.setEndTimeStamp(clock.getTime());
         dcg.dcgNodes.remove(t);
         dcg.dcgNodes.add(t);
+        System.out.println("Current Committed Transactions on site " + this.siteId + " : " + committedTransactions);
     }
 
 //    public static void main(String[] args){

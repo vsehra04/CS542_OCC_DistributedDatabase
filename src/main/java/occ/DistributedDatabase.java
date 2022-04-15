@@ -29,13 +29,13 @@ public class DistributedDatabase {
         s3.setupServerClient(Arrays.asList("172.17.33.152","172.17.33.152","172.17.33.152"), Arrays.asList(server1, server2, server4));
 
 
-        s4.setupServerClient(Arrays.asList("127.0.0.1","127.0.0.1","127.0.0.1"), Arrays.asList(server1, server2, server3));
+        s4.setupServerClient(Arrays.asList("172.17.33.152","172.17.33.152","172.17.33.152"), Arrays.asList(server1, server2, server3));
 
 
         String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
         s1.QueueTransaction(t1);
 
-        String t2 = "begin;read(2000,2);wait(1010);read(20,100);write(30,100,100)";
+        String t2 = "begin;read(2000,2);wait(2000);read(20,100);write(30,100,100)";
         s2.QueueTransaction(t2);
 
         Site.pause(30000);
