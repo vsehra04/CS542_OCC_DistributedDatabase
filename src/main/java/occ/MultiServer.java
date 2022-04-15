@@ -5,6 +5,7 @@ import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReentrantLock;
 
 public class MultiServer{
     private enum SERVER_STATUS {RUNNING, SHUTDOWN}
@@ -17,6 +18,7 @@ public class MultiServer{
     private List<Socket> clientSocket;
     private List<ObjectInputStream> inputStream;
     private List<ObjectOutputStream> outputStream;
+    private ReentrantLock lock;
 
     public MultiServer(int siteId, TransactionManager serverTM, int port) {
         this.siteId = siteId;
@@ -27,6 +29,7 @@ public class MultiServer{
         clientSocket = new ArrayList<>();
         inputStream = new ArrayList<>();
         outputStream = new ArrayList<>();
+        lock = new ReentrantLock();
     }
     // my question: should server be on a new thread? because if we are in the main thread, we will never be able to go to the next line
     // until we connect clients, and to connect clients, we need to go to the next line, therefore deadlocked?!
@@ -72,11 +75,18 @@ public class MultiServer{
                             System.out.println("Ack message received from a site ID " + request.getSiteId() + " for transaction: " + request.getTransaction().getTransactionId());
                             // acknowledgement message received
                             System.out.println("Server site ID : " + siteId);
-                            int count = serverTM.incrementAndGetSemiCommittedTransactions(request.getTransaction());
-                            System.out.println("COUNT: " + count);
-                            serverTM.getClock().updateTime((int) request.getTime());
-                            if (count == 3){
-                                sendAll(Packet.MESSAGES.GLOBAL_COMMIT, request.getTransaction());
+                            lock.lock();
+                            try {
+                                int count = serverTM.incrementAndGetSemiCommittedTransactions(request.getTransaction());
+                                System.out.println("COUNT: " + count);
+                                serverTM.getClock().updateTime((int) request.getTime());
+                                if (count == 3) {
+                                    System.out.println("Count 3!!!");
+                                    sendAll(Packet.MESSAGES.GLOBAL_COMMIT, request.getTransaction());
+                                }
+                            }
+                            finally {
+                                lock.unlock();
                             }
                         }
                     }

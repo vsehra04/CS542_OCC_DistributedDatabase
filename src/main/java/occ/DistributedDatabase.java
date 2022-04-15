@@ -18,7 +18,7 @@ public class DistributedDatabase {
 
         Site.pause(2000);
 
-        int server1 = 5700, server2 = 5701, server3 = 5702, server4 = 5704;
+        int server1 = 5700, server2 = 5701, server3 = 5702, server4 = 5703;
 
         s1.setupServerClient(Arrays.asList("127.0.0.1","127.0.0.1","127.0.0.1"), Arrays.asList(server2, server3, server4));
 
