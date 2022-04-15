@@ -269,9 +269,10 @@ public class TransactionManager{
     }
 
     public void abortTransaction(Transaction t){
-        if(semiCommittedTransactions.containsKey(t)){
+        clock.tick();
+        if(semiCommittedTransactions.containsKey(t.getTransactionId())){
             System.out.println("Removing from semi-committed transactions");
-            semiCommittedTransactions.remove(t);
+            semiCommittedTransactions.remove(t.getTransactionId());
             transactionIdMap.remove(t.getTransactionId());
             dcg.removeTransaction(t);
         }
@@ -279,11 +280,20 @@ public class TransactionManager{
             System.out.println("Adding to abort set");
             abortSet.add(t);
         }
+
+        if(t.getInitiatingSite() == this.siteId){
+            System.out.println("Transaction with id: " + t.getTransactionId() + " aborted during global validation due to conflicts at TS: "+ clock.getTime());
+            Transaction restartAbortedTransaction = new Transaction(this.siteId, clock.getTime());
+            System.out.println("Transaction restarted with TID: " + restartAbortedTransaction.getTransactionId());
+            restartAbortedTransaction.setReadSet(t.getReadSet());
+            restartAbortedTransaction.setWriteSet(t.getWriteSet());
+            updateWriteSet(restartAbortedTransaction);
+        }
     }
 
     public void globalCommit(Transaction t){
-        System.out.println("Global Committing :" + t.getTransactionId());
-        semiCommittedTransactions.remove(t);
+        System.out.println("Global Committing :" + t.getTransactionId() + " at site: " + this.siteId + " at time: " + this.clock.getTime());
+        semiCommittedTransactions.remove(t.getTransactionId());
         transactionIdMap.remove(t.getTransactionId());
         committedTransactions.add(t);
 
