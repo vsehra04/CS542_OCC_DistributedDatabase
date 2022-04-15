@@ -281,14 +281,14 @@ public class TransactionManager{
             abortSet.add(t);
         }
 
-        if(t.getInitiatingSite() == this.siteId){
-            System.out.println("Transaction with id: " + t.getTransactionId() + " aborted during global validation due to conflicts at TS: "+ clock.getTime());
-            Transaction restartAbortedTransaction = new Transaction(this.siteId, clock.getTime());
-            System.out.println("Transaction restarted with TID: " + restartAbortedTransaction.getTransactionId());
-            restartAbortedTransaction.setReadSet(t.getReadSet());
-            restartAbortedTransaction.setWriteSet(t.getWriteSet());
-            updateWriteSet(restartAbortedTransaction);
-        }
+//        if(t.getInitiatingSite() == this.siteId){
+//            System.out.println("Transaction with id: " + t.getTransactionId() + " aborted during global validation due to conflicts at TS: "+ clock.getTime());
+//            Transaction restartAbortedTransaction = new Transaction(this.siteId, clock.getTime());
+//            System.out.println("Transaction restarted with TID: " + restartAbortedTransaction.getTransactionId());
+//            restartAbortedTransaction.setReadSet(t.getReadSet());
+//            restartAbortedTransaction.setWriteSet(t.getWriteSet());
+//            updateWriteSet(restartAbortedTransaction);
+//        }
     }
 
     public void globalCommit(Transaction t){

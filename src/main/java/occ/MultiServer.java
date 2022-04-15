@@ -115,11 +115,15 @@ public class MultiServer{
     }
     public void sendAll(Packet.MESSAGES message, Transaction transaction) {
         if(message == Packet.MESSAGES.GLOBAL_COMMIT){
-            System.out.println("SENDING GLOBAL COMMIT TO ALL SITES");
+            System.out.println("SENDING GLOBAL COMMIT TO ALL SITES FOR TRANSACTION ID: " + transaction.getTransactionId());
             sendPacket(transaction, message);
         }
         else if(message == Packet.MESSAGES.VALIDATE){
-            System.out.println("SENDING VALIDATE TO ALL SITES");
+            System.out.println("SENDING VALIDATE TO ALL SITES FOR TRANSACTION ID: " + transaction.getTransactionId());
+            sendPacket(transaction, message);
+        }
+        else if(message == Packet.MESSAGES.ABORT){
+            System.out.println("SENDING ABORT TO ALL SITES FOR TRANSACTION ID: " + transaction.getTransactionId());
             sendPacket(transaction, message);
         }
     }
