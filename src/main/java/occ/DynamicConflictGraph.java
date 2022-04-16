@@ -20,7 +20,7 @@ public class DynamicConflictGraph {
 
     public void addNode(Transaction t){
         System.out.println("Node added");
-        adjNodes.put(t.getTransactionId(), new ArrayList<>());
+        this.adjNodes.put(t.getTransactionId(), new ArrayList<>());
         UUID_Transaction_Map.put(t.getTransactionId(), t);
         lc.tick();
     }
@@ -33,6 +33,7 @@ public class DynamicConflictGraph {
     }
 
     public void addEdge(Transaction t1, Transaction t2){
+        if(!adjNodes.containsKey(t1.getTransactionId()))addNode(t1); // not sure if correct or not
         adjNodes.get(t1.getTransactionId()).add(t2.getTransactionId());
         lc.tick();
     }
@@ -112,8 +113,10 @@ public class DynamicConflictGraph {
     public boolean checkCycle(Transaction t1){
         Set<Transaction> inStack = new HashSet<>();
         System.out.println("In cycle detection");
-        boolean cycle = dfs(t1, inStack);
+        Map<UUID, List<UUID>> adjacencyList = Map.copyOf(adjNodes);
+        boolean cycle = dfs(t1, inStack, adjacencyList);
         if(cycle){
+            System.out.println("CYCLE DETECTED");
             abortTransaction(t1);
         }
         if(!cycle){
@@ -124,13 +127,13 @@ public class DynamicConflictGraph {
         return cycle;
     }
 
-    private boolean dfs(Transaction t1, Set<Transaction> inStack) {
-        if(this.adjNodes.get(t1.getTransactionId()) == null)return false;
+    private boolean dfs(Transaction t1, Set<Transaction> inStack, Map<UUID, List<UUID>> adjNodes) {
+        if(adjNodes.get(t1.getTransactionId()) == null)return false;
         inStack.add(t1);
-        for(UUID u: this.adjNodes.get(t1.getTransactionId())){
+        for(UUID u: adjNodes.get(t1.getTransactionId())){
             Transaction t = UUID_Transaction_Map.get(u);
             if(inStack.contains(t))return true;
-            if(dfs(t, inStack))return true;
+            if(dfs(t, inStack, adjNodes))return true;
         }
         inStack.remove(t1);
         return false;
@@ -141,8 +144,8 @@ public class DynamicConflictGraph {
         // check conflicts with all overlapping transactions
         addNode(validationTrans);
         getConcurrentTransactions(validationTrans);
-        if(validationTrans.getState() != Transaction.STATES.ABORTED)return !checkCycle(validationTrans);
-        return validationTrans.getState() != Transaction.STATES.ABORTED;
+        return !checkCycle(validationTrans);
+//        return validationTrans.getState() != Transaction.STATES.ABORTED;
     }
 
     public void removeTransaction(Transaction t){

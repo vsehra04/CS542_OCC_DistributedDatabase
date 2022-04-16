@@ -21,7 +21,7 @@ public class TransactionManager{
     private Set<Transaction> committedTransactions;
     private Map<UUID, AtomicInteger> semiCommittedTransactions;
     private Map<UUID, Transaction> transactionIdMap;
-    private Set<Transaction> abortSet;
+    private Set<UUID> abortSet;
     private AtomicInteger activeThreads;
     private LamportClock clock;
     private Database database;
@@ -43,8 +43,9 @@ public class TransactionManager{
     }
     public int incrementAndGetSemiCommittedTransactions(Transaction transaction){
         //semiCommittedTransactions.put(transaction.getTransactionId(), (semiCommittedTransactions.get(transaction.getTransactionId()).getAndIncrement()));
+        if(!semiCommittedTransactions.containsKey(transaction.getTransactionId()))return 0;
         System.out.println("Site ID : " + siteId + " getting : " + semiCommittedTransactions.get(transaction.getTransactionId()).get());
-        semiCommittedTransactions.get(transaction.getTransactionId()).getAndIncrement();
+        semiCommittedTransactions.getOrDefault(transaction.getTransactionId(), new AtomicInteger(0)).getAndIncrement();
         System.out.println("Site ID : " + siteId + " after incrementing : " + semiCommittedTransactions.get(transaction.getTransactionId()).get());
         return semiCommittedTransactions.get(transaction.getTransactionId()).get();
     }
@@ -96,7 +97,7 @@ public class TransactionManager{
                         // call dcg function to check if valid -> if false -> we abort restart the transaction, else put in semi-committed state
                         clock.tick();
                         //Transaction present in abort set
-                        if(abortSet.contains(validationTrans)){ abortSet.remove(validationTrans); continue;}
+                        if(abortSet.contains(validationTrans.getTransactionId())){ abortSet.remove(validationTrans.getTransactionId()); continue;}
                         if(dcg.validateTransaction(validationTrans)){
                             transactionIdMap.put(validationTrans.getTransactionId(), validationTrans);
                             semiCommittedTransactions.put(validationTrans.getTransactionId(), semiCommittedTransactions.getOrDefault(validationTrans.getTransactionId(), new AtomicInteger(0)));
@@ -278,7 +279,7 @@ public class TransactionManager{
         }
         else{
             System.out.println("Adding to abort set");
-            abortSet.add(t);
+            abortSet.add(t.getTransactionId());
         }
 
 //        if(t.getInitiatingSite() == this.siteId){

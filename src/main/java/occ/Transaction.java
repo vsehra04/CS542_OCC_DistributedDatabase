@@ -24,7 +24,7 @@ public class Transaction implements Serializable {
     private long endTimeStamp;
 
     // list with all incoming edges in the conflict graph
-    private Set<UUID> incomingEdges;
+//    private Set<UUID> incomingEdges;
 
     public Transaction(int initiatingSite, int time) {
         this.readSet = new HashSet<>();
@@ -34,7 +34,7 @@ public class Transaction implements Serializable {
         this.initiatingSite = initiatingSite;
         this.transactionId = UUID.randomUUID();
         this.state = STATES.RUNNING;
-        this.incomingEdges = new HashSet<>();
+//        this.incomingEdges = new HashSet<>();
     }
 
     public int getInitiatingSite() {
@@ -65,9 +65,9 @@ public class Transaction implements Serializable {
         return endTimeStamp;
     }
 
-    public Set<UUID> getIncomingEdges() {
-        return incomingEdges;
-    }
+//    public Set<UUID> getIncomingEdges() {
+//        return incomingEdges;
+//    }
 
     public void setState(STATES state) {
         this.state = state;
@@ -103,15 +103,15 @@ public class Transaction implements Serializable {
     }
 
     //incomingEDGES operations
-    public void appendToIncomingEdges(UUID transactionId){
-        this.incomingEdges.add(transactionId);
-    }
-    public void removeFromIncomingEdges(UUID transactionId){
-        this.incomingEdges.remove(transactionId);
-    }
-    public boolean isPresentIncomingEdges(UUID transactionId){
-        return this.incomingEdges.contains(transactionId);
-    }
+//    public void appendToIncomingEdges(UUID transactionId){
+//        this.incomingEdges.add(transactionId);
+//    }
+//    public void removeFromIncomingEdges(UUID transactionId){
+//        this.incomingEdges.remove(transactionId);
+//    }
+//    public boolean isPresentIncomingEdges(UUID transactionId){
+//        return this.incomingEdges.contains(transactionId);
+//    }
 
 //    public Transaction restartTransaction(){
 //        return new Transaction(this.initiatingSite);
