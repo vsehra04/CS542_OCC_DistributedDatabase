@@ -36,9 +36,9 @@ public class TransactionManager{
         currentTransactions = ConcurrentHashMap.newKeySet();
         semiCommittedTransactions = new ConcurrentHashMap<>();
         transactionIdMap = new HashMap<>();
-        committedTransactions = new HashSet<>();
+        committedTransactions = ConcurrentHashMap.newKeySet();
         activeThreads = new AtomicInteger(0);
-        abortSet = new HashSet<>();
+        abortSet = ConcurrentHashMap.newKeySet();
         this.database = db;
     }
     public int incrementAndGetSemiCommittedTransactions(Transaction transaction){
