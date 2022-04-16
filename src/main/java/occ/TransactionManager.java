@@ -100,7 +100,8 @@ public class TransactionManager{
                         if(abortSet.contains(validationTrans.getTransactionId())){ abortSet.remove(validationTrans.getTransactionId()); continue;}
                         if(dcg.validateTransaction(validationTrans)){
                             transactionIdMap.put(validationTrans.getTransactionId(), validationTrans);
-                            semiCommittedTransactions.put(validationTrans.getTransactionId(), semiCommittedTransactions.getOrDefault(validationTrans.getTransactionId(), new AtomicInteger(0)));
+//                            semiCommittedTransactions.put(validationTrans.getTransactionId(), semiCommittedTransactions.getOrDefault(validationTrans.getTransactionId(), new AtomicInteger(0)));
+                            semiCommittedTransactions.put(validationTrans.getTransactionId(), new AtomicInteger(0));
                             validationTrans.setState(Transaction.STATES.SEMI_COMMITTED);
 
                             validationTrans.setEndTimeStamp(clock.getTime());
