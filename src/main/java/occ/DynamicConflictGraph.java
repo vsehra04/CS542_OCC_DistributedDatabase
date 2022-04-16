@@ -19,7 +19,7 @@ public class DynamicConflictGraph {
     }
 
     public void addNode(Transaction t){
-        System.out.println("Node added");
+        System.out.println("Transaction : " + t.getTransactionId() + " added in Adj List");
         this.adjNodes.put(t.getTransactionId(), new ArrayList<>());
         UUID_Transaction_Map.put(t.getTransactionId(), t);
         lc.tick();
@@ -40,8 +40,8 @@ public class DynamicConflictGraph {
 
     public void checkConflict(Transaction t1, Transaction t2){
 
-        System.out.println(t1.getWriteSet() + "T2 : "  + t2.getWriteSet());
-        System.out.println(t1.getReadSet() + "T2 : "  + t2.getReadSet());
+//        System.out.println(t1.getWriteSet() + "T2 : "  + t2.getWriteSet());
+//        System.out.println(t1.getReadSet() + "T2 : "  + t2.getReadSet());
         Set<List<Integer>> t1_intersection = new HashSet<List<Integer>>(t1.getReadSet());
         t1_intersection.retainAll(t2.getWriteSet().keySet());
 

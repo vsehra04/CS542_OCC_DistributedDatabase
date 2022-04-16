@@ -82,7 +82,7 @@ public class Site implements Runnable{
     void transactionsDone(Site s){
         s.stop();
         tm.stop();
-        System.out.println("Site Time:" + clock.getTime());
+        //System.out.println("Site Time:" + clock.getTime());
         try {
             server.stop();
         } catch (IOException e) {
