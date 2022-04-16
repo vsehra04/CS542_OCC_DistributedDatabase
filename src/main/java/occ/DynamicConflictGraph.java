@@ -144,6 +144,7 @@ public class DynamicConflictGraph {
         // check conflicts with all overlapping transactions
         addNode(validationTrans);
         getConcurrentTransactions(validationTrans);
+        if(validationTrans.getState() == Transaction.STATES.ABORTED)return false;
         return !checkCycle(validationTrans);
 //        return validationTrans.getState() != Transaction.STATES.ABORTED;
     }
