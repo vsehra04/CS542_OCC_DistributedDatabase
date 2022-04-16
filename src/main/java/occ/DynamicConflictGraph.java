@@ -5,7 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DynamicConflictGraph {
-    private Map<UUID, List<Transaction>> adjNodes;
+    private Map<UUID, List<UUID>> adjNodes;
     Map<UUID, Transaction> UUID_Transaction_Map = new ConcurrentHashMap<>();
 
     //To store EndTime of Committed and Semi-Committed Transactions (Descending Order)
@@ -26,14 +26,14 @@ public class DynamicConflictGraph {
     }
 
     public void removeNode(Transaction t){
-        adjNodes.values().stream().forEach(e -> e.remove(t));
+        adjNodes.values().stream().forEach(e -> e.remove(t.getTransactionId()));
         adjNodes.remove(t.getTransactionId());
-        UUID_Transaction_Map.remove(t);
+        UUID_Transaction_Map.remove(t.getTransactionId());
         lc.tick();
     }
 
     public void addEdge(Transaction t1, Transaction t2){
-        adjNodes.get(t1.getTransactionId()).add(t2);
+        adjNodes.get(t1.getTransactionId()).add(t2.getTransactionId());
         lc.tick();
     }
 
@@ -87,11 +87,13 @@ public class DynamicConflictGraph {
             return;
         }
         else {
-           for(int i=dcgNodes.size()-1; i>=0; i--){
-               if(UUID_Transaction_Map.get(dcgNodes.get(i)).getEndTimeStamp() >= t.getStartTimestamp()){
+            ListIterator<UUID> iterator = dcgNodes.listIterator(dcgNodes.size());
+           while(iterator.hasPrevious()){
+               UUID curr = iterator.previous();
+               if(UUID_Transaction_Map.containsKey(curr) && UUID_Transaction_Map.get(curr).getEndTimeStamp() >= t.getStartTimestamp()){
                   //System.out.println("End Time" + dcgNodes.get(i).getEndTimeStamp());
                   // System.out.println("Check Conflict with : " + dcgNodes.get(i).getTransactionId() + "End Timestamp : " + dcgNodes.get(i).getEndTimeStamp());
-                   checkConflict(t, UUID_Transaction_Map.get(dcgNodes.get(i)));
+                   if(UUID_Transaction_Map.containsKey(curr)) checkConflict(t, UUID_Transaction_Map.get(curr));
                }
                else{
                    break;
@@ -125,7 +127,8 @@ public class DynamicConflictGraph {
     private boolean dfs(Transaction t1, Set<Transaction> inStack) {
         if(this.adjNodes.get(t1.getTransactionId()) == null)return false;
         inStack.add(t1);
-        for(Transaction t: this.adjNodes.get(t1.getTransactionId())){
+        for(UUID u: this.adjNodes.get(t1.getTransactionId())){
+            Transaction t = UUID_Transaction_Map.get(u);
             if(inStack.contains(t))return true;
             if(dfs(t, inStack))return true;
         }

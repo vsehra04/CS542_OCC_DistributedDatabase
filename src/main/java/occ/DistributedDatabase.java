@@ -53,8 +53,11 @@ public class DistributedDatabase {
 
         String t2 = "begin;read(2000,2);wait(2000);read(20,100);write(1,2,100)";
         s2.QueueTransaction(t2);
-        String t3 = "begin;read(3000,3);wait(3000);write(1000,1,30);read(1,2)";
+        String t3 = "begin;read(3000,3);wait(2000);write(1000,1,30);read(1,2)";
         s3.QueueTransaction(t3);
+
+        String t4 = "begin;read(2000,1);wait(1000);read(30,100);write(20,100,10);write(1,100,10);";
+        s1.QueueTransaction(t4);
 
         Site.pause(30000);
 
