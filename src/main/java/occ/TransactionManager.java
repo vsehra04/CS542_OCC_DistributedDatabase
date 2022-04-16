@@ -300,8 +300,8 @@ public class TransactionManager{
         t.getWriteSet().forEach((key, val) -> database.setDbElement(key.get(0), key.get(1), val));
         clock.tick();
         t.setEndTimeStamp(clock.getTime());
-        dcg.dcgNodes.remove(t);
-        dcg.dcgNodes.add(t);
+        dcg.dcgNodes.remove(t.getTransactionId());
+        dcg.dcgNodes.add(t.getTransactionId());
         System.out.println("Current Committed Transactions on site " + this.siteId + " : " + committedTransactions);
     }
 

@@ -5,10 +5,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class DynamicConflictGraph {
-    private Map<Transaction, List<Transaction>> adjNodes;
+    private Map<UUID, List<Transaction>> adjNodes;
+    Map<UUID, Transaction> UUID_Transaction_Map = new ConcurrentHashMap<>();
 
     //To store EndTime of Committed and Semi-Committed Transactions (Descending Order)
-    CopyOnWriteArrayList<Transaction> dcgNodes = new CopyOnWriteArrayList<>();
+    CopyOnWriteArrayList<UUID> dcgNodes = new CopyOnWriteArrayList<>();
 
     private LamportClock lc;
 
@@ -19,18 +20,20 @@ public class DynamicConflictGraph {
 
     public void addNode(Transaction t){
         System.out.println("Node added");
-        adjNodes.put(t, new ArrayList<>());
+        adjNodes.put(t.getTransactionId(), new ArrayList<>());
+        UUID_Transaction_Map.put(t.getTransactionId(), t);
         lc.tick();
     }
 
     public void removeNode(Transaction t){
         adjNodes.values().stream().forEach(e -> e.remove(t));
-        adjNodes.remove(t);
+        adjNodes.remove(t.getTransactionId());
+        UUID_Transaction_Map.remove(t);
         lc.tick();
     }
 
     public void addEdge(Transaction t1, Transaction t2){
-        adjNodes.get(t1).add(t2);
+        adjNodes.get(t1.getTransactionId()).add(t2);
         lc.tick();
     }
 
@@ -85,10 +88,10 @@ public class DynamicConflictGraph {
         }
         else {
            for(int i=dcgNodes.size()-1; i>=0; i--){
-               if(dcgNodes.get(i).getEndTimeStamp() >= t.getStartTimestamp()){
+               if(UUID_Transaction_Map.get(dcgNodes.get(i)).getEndTimeStamp() >= t.getStartTimestamp()){
                   //System.out.println("End Time" + dcgNodes.get(i).getEndTimeStamp());
                   // System.out.println("Check Conflict with : " + dcgNodes.get(i).getTransactionId() + "End Timestamp : " + dcgNodes.get(i).getEndTimeStamp());
-                   checkConflict(t, dcgNodes.get(i));
+                   checkConflict(t, UUID_Transaction_Map.get(dcgNodes.get(i)));
                }
                else{
                    break;
@@ -111,15 +114,18 @@ public class DynamicConflictGraph {
         if(cycle){
             abortTransaction(t1);
         }
-        if(!cycle)dcgNodes.add(t1);
-        adjNodes.forEach((key, value) -> System.out.println(key.getTransactionId() + ":" + value));
+        if(!cycle){
+            dcgNodes.add(t1.getTransactionId());
+            UUID_Transaction_Map.put(t1.getTransactionId(), t1);
+        }
+        adjNodes.forEach((key, value) -> System.out.println(UUID_Transaction_Map.get(key).getTransactionId() + ":" + value));
         return cycle;
     }
 
     private boolean dfs(Transaction t1, Set<Transaction> inStack) {
-        if(this.adjNodes.get(t1) == null)return false;
+        if(this.adjNodes.get(t1.getTransactionId()) == null)return false;
         inStack.add(t1);
-        for(Transaction t: this.adjNodes.get(t1)){
+        for(Transaction t: this.adjNodes.get(t1.getTransactionId())){
             if(inStack.contains(t))return true;
             if(dfs(t, inStack))return true;
         }
@@ -137,7 +143,8 @@ public class DynamicConflictGraph {
     }
 
     public void removeTransaction(Transaction t){
-        dcgNodes.remove(t);
+        dcgNodes.remove(t.getTransactionId());
+        UUID_Transaction_Map.remove(t.getTransactionId());
         removeNode(t);
     }
 
