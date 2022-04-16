@@ -123,11 +123,12 @@ public class DynamicConflictGraph {
             dcgNodes.add(t1.getTransactionId());
             UUID_Transaction_Map.put(t1.getTransactionId(), t1);
         }
-        adjNodes.forEach((key, value) -> System.out.println(UUID_Transaction_Map.get(key).getTransactionId() + ":" + value));
+//        adjNodes.forEach((key, value) -> System.out.println(UUID_Transaction_Map.get(key).getTransactionId() + ":" + value));
         return cycle;
     }
 
     private boolean dfs(Transaction t1, Set<Transaction> inStack, Map<UUID, List<UUID>> adjNodes) {
+        if(t1 == null)return false;
         if(adjNodes.get(t1.getTransactionId()) == null)return false;
         inStack.add(t1);
         for(UUID u: adjNodes.get(t1.getTransactionId())){

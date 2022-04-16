@@ -3,6 +3,7 @@ package occ;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 import java.net.*;
 
 public class Client implements Runnable{
@@ -45,7 +46,7 @@ public class Client implements Runnable{
 //        return resp;
         try {
             outputStream.writeObject(packet);
-//            outputStream.flush(); // not sure if needed or not
+            outputStream.flush(); // not sure if needed or not
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -64,7 +65,9 @@ public class Client implements Runnable{
         // message listener
         while(running){
             try {
-                Packet response = new Packet((Packet)inputStream.readObject());
+                Object obj = inputStream.readObject();
+                if(!(obj instanceof Packet))continue;
+                Packet response = (Packet)obj;
                 System.out.println("Site id: " + this.initiatingSite);
                 if(response.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
                 else if(response.getMessage() == Packet.MESSAGES.VALIDATE){
@@ -92,7 +95,12 @@ public class Client implements Runnable{
                     clientTM.getClock().updateTime((int) response.getTime());
                     clientTM.globalCommit(response.getTransaction());
                 }
-            } catch (IOException | ClassNotFoundException e) {
+            }
+//            catch(StreamCorruptedException sce){
+//                System.out.println("Stream Corrupted Exception");
+//                continue;
+//            }
+            catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
         }

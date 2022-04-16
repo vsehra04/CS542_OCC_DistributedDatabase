@@ -108,6 +108,7 @@ public class MultiServer{
         for(int i=0;i<clientSocket.size();i++){
             try {
                 outputStream.get(i).writeObject(new Packet(serverTM.getClock().getTime(), transaction, message, siteId));
+                outputStream.get(i).flush();
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -146,36 +147,4 @@ public class MultiServer{
         }
     }
 
-//    private static class ClientHandler extends Thread {
-//
-//
-//        public ClientHandler(Socket socket) {
-//            this.clientSocket = socket;
-//        }
-//
-//        public void run(){
-//            try {
-//                outputStream = new ObjectOutputStream(clientSocket.getOutputStream());
-//                inputStream = new ObjectInputStream(clientSocket.getInputStream());
-//                while (true){
-//                    Packet request = new Packet((Packet)inputStream.readObject());
-//                    if(request.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
-//                    else{
-//                        System.out.println("Ack message received from a site for transaction: " + request.getTransaction().getTransactionId());
-//                        // acknowledgement message received
-//                        serverTM.incrementAndGetSemiCommittedTransactions(request.getTransaction());
-//                    }
-//                }
-//            } catch (IOException | ClassNotFoundException e) {
-//                e.printStackTrace();
-//            }
-//            try {
-//                outputStream.close();
-//                inputStream.close();
-//                clientSocket.close();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
 }
