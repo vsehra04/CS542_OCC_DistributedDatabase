@@ -149,9 +149,9 @@ public class TransactionManager{
         ArrayList<ArrayList<Integer>> db = this.database.getDb();
         Map<List<Integer>, Integer> writeSet = transaction.getWriteSet();
 
-        for(List<Integer> li: writeSet.keySet()){
-            writeSet.replace(li, db.get(li.get(0)).get(li.get(1)));
-        }
+//        for(List<Integer> li: writeSet.keySet()){
+//            writeSet.replace(li, db.get(li.get(0)).get(li.get(1)));
+//        }
         transaction.setWriteSet(writeSet);
         clock.tick();
         currentTransactions.add(transaction);
@@ -235,7 +235,7 @@ public class TransactionManager{
                             }
 
                             t.appendToWriteSet(Arrays.asList(row,col),value);
-//                            System.out.println(row + " " + col + " " + value);
+                            System.out.println(row + " " + col + " " + value);
                         }
                         else{
                             System.out.println("Wrong Write syntax");
@@ -299,7 +299,8 @@ public class TransactionManager{
         transactionIdMap.remove(t.getTransactionId());
         committedTransactions.add(t);
 
-        t.getWriteSet().forEach((key, val) -> database.setDbElement(key.get(0), key.get(1), val));
+        System.out.println("Write Set for transaction : " + t.getTransactionId() + " : " + t.getWriteSet());
+        t.getWriteSet().forEach((key, val) -> this.database.setDbElement(key.get(0), key.get(1), val));
         clock.tick();
         t.setEndTimeStamp(clock.getTime());
         dcg.dcgNodes.remove(t.getTransactionId());

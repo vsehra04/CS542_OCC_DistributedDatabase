@@ -1,5 +1,6 @@
 package occ;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class DistributedDatabase {
@@ -32,41 +33,29 @@ public class DistributedDatabase {
         s4.setupServerClient(Arrays.asList("127.0.0.1","127.0.0.1","127.0.0.1"), Arrays.asList(server1, server2, server3));
 
 
-//        String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
-//        s1.QueueTransaction(t1);
-//
-//        String t2 = "begin;read(2000,2);wait(2000);read(20,100);write(30,100,100)";
-//        s2.QueueTransaction(t2);
-//
-//        String t3 = "begin;write(1000,1,10);wait(1010);read(20,100);";
-//        s3.QueueTransaction(t3);
-
-//        String t2 = "begin;read(2000,1);wait(1000);read(20,200);write(20,100,10);write(70,100,10);write(40,100,10);";
-//        s1.QueueTransaction(t2);
+        Site.pause(100000);
 
 
-//        String t3 = "begin;read(2000,2);wait(1010);read(20,100);write(30,100,100)";
-//        s2.QueueTransaction(t3);
+        ArrayList<ArrayList<Integer>> s1_db =  s1.getDatabase().getDb();
+        ArrayList<ArrayList<Integer>> s2_db =  s2.getDatabase().getDb();
+        ArrayList<ArrayList<Integer>> s3_db =  s3.getDatabase().getDb();
+        ArrayList<ArrayList<Integer>> s4_db =  s4.getDatabase().getDb();
 
-        String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
-        s1.QueueTransaction(t1);
+        System.out.println(s1_db.get(1000).get(1));
+        //System.out.println(s2_db.get(30).get(100));
 
-        String t2 = "begin;read(1000,1);wait(1000);write(30,100,10);";
-        s2.QueueTransaction(t2);
-//
-//        String t2 = "begin;read(2000,2);wait(1000);read(20,100);write(1,2,100)";
-//        s2.QueueTransaction(t2);
-//        String t3 = "begin;read(3000,3);wait(1000);write(1000,1,30);read(1,2)";
-//        s3.QueueTransaction(t3);
-//
-//        String t4 = "begin;read(2000,1);wait(1000);read(30,100);write(20,100,10);write(1,100,10);";
-//        s1.QueueTransaction(t4);
-//
-//        String t5 = "begin;read(2000,2);wait(1000);read(20,100);write(1,2,100)";
-//        s4.QueueTransaction(t5);
-//
-//        String t6 = "begin;read(20,21);wait(2000);read(20,100);write(1,2,100)";
-//        s1.QueueTransaction(t6);
+        for(int i=0; i<10000; i++){
+            for(int j=0; j<10000; j++){
+               if(s1_db.get(i).get(j).equals(s2_db.get(i).get(j)) && s1_db.get(i).get(j).equals(s3_db.get(i).get(j)) && s1_db.get(i).get(j).equals(s4_db.get(i).get(j))){
+                   continue;
+               }
+               else{
+                   System.out.println("F");
+               }
+            }
+        }
+        System.out.println("Consistent");
+
 
         Site.pause(60000);
 

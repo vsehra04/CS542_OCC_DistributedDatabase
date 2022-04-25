@@ -107,7 +107,9 @@ public class MultiServer{
     private void sendPacket(Transaction transaction, Packet.MESSAGES message){
         for(int i=0;i<clientSocket.size();i++){
             try {
-                outputStream.get(i).writeObject(new Packet(serverTM.getClock().getTime(), transaction, message, siteId));
+                Packet packet = new Packet(serverTM.getClock().getTime(), transaction, message, siteId);
+                //System.out.println(packet);
+                outputStream.get(i).writeObject(packet);
                 outputStream.get(i).flush();
             } catch (IOException e) {
                 e.printStackTrace();

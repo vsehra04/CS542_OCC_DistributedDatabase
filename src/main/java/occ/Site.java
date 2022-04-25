@@ -10,6 +10,7 @@ public class Site implements Runnable{
 
     //Main Datastore : Same on all sites (replicated database)
     private Database database;
+
     private Queue<String> transactionQueue = new ConcurrentLinkedQueue<String>();
     private final TransactionManager tm;
     private LamportClock clock;
@@ -36,6 +37,10 @@ public class Site implements Runnable{
     //Fetch the SiteID
     public int getSiteID() {
         return siteID;
+    }
+
+    public Database getDatabase() {
+        return database;
     }
 
     //Used to enqueue new transactions inorder to send them to Transaction Manager

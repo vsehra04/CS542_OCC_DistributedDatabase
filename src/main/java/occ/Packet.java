@@ -27,6 +27,10 @@ public class Packet implements Serializable {
         this.siteId = siteId;
     }
 
+    public String toString(){
+        return "In Packet : Transaction : " + this.transaction.getTransactionId() + " Message : " + this.message + " site id : " + this.siteId + " time : " + this.time;
+    }
+
     public long getTime() {
         return time;
     }

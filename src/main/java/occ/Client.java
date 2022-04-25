@@ -44,6 +44,7 @@ public class Client implements Runnable{
 //        out.println(msg);
 //        String resp = in.readLine();
 //        return resp;
+        //if(packet instanceof Packet) System.out.println(packet);
         try {
             outputStream.writeObject(packet);
             outputStream.flush(); // not sure if needed or not
@@ -66,7 +67,7 @@ public class Client implements Runnable{
         while(running){
             try {
                 Object obj = inputStream.readObject();
-                if(!(obj instanceof Packet))continue;
+                if(!(obj instanceof Packet)) {System.out.println("Object : " + obj);continue;}
                 Packet response = (Packet)obj;
                 System.out.println("Site id: " + this.initiatingSite);
                 if(response.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
