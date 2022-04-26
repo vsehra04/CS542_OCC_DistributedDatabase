@@ -32,6 +32,12 @@ public class DistributedDatabase {
 
         s4.setupServerClient(Arrays.asList("127.0.0.1","127.0.0.1","127.0.0.1"), Arrays.asList(server1, server2, server3));
 
+        String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
+        s1.QueueTransaction(t1);
+
+        String t2 = "begin;read(1000,1);wait(2000);write(30,100,10);";
+        s2.QueueTransaction(t2);
+
 
         Site.pause(100000);
 
@@ -40,9 +46,6 @@ public class DistributedDatabase {
         ArrayList<ArrayList<Integer>> s2_db =  s2.getDatabase().getDb();
         ArrayList<ArrayList<Integer>> s3_db =  s3.getDatabase().getDb();
         ArrayList<ArrayList<Integer>> s4_db =  s4.getDatabase().getDb();
-
-        System.out.println(s1_db.get(1000).get(1));
-        //System.out.println(s2_db.get(30).get(100));
 
         for(int i=0; i<10000; i++){
             for(int j=0; j<10000; j++){

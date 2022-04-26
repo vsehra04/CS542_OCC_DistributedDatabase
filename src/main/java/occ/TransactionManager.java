@@ -17,7 +17,7 @@ public class TransactionManager{
     private final int siteId;
     private Queue<Transaction> validationQueue = new ConcurrentLinkedQueue<Transaction>();
     // current running transactions
-    private Set<Transaction> currentTransactions; // Don't think thread-safe needed (confirm later)
+    private Set<Transaction> currentTransactions;
     private Set<Transaction> committedTransactions;
     private Map<UUID, AtomicInteger> semiCommittedTransactions;
     private Map<UUID, Transaction> transactionIdMap;
@@ -42,11 +42,8 @@ public class TransactionManager{
         this.database = db;
     }
     public int incrementAndGetSemiCommittedTransactions(Transaction transaction){
-        //semiCommittedTransactions.put(transaction.getTransactionId(), (semiCommittedTransactions.get(transaction.getTransactionId()).getAndIncrement()));
         if(!semiCommittedTransactions.containsKey(transaction.getTransactionId()))return 0;
-        //System.out.println("Site ID : " + siteId + " getting : " + semiCommittedTransactions.get(transaction.getTransactionId()).get());
         semiCommittedTransactions.getOrDefault(transaction.getTransactionId(), new AtomicInteger(0)).getAndIncrement();
-        //System.out.println("Site ID : " + siteId + " after incrementing : " + semiCommittedTransactions.get(transaction.getTransactionId()).get());
         return semiCommittedTransactions.get(transaction.getTransactionId()).get();
     }
     public void setClientMap(Map<Integer, Client> clientMap) {
@@ -68,7 +65,6 @@ public class TransactionManager{
                 Transaction currTransaction = convertToTransaction(transaction, database);
                 clock.tick();
                 if(currTransaction != null && !Objects.equals(currTransaction.getState(), Transaction.STATES.ABORTED)){
-//                    System.out.println(currTransaction.getState());
                     currentTransactions.add(currTransaction);
                     System.out.println("Transaction with TID: " + currTransaction.getTransactionId() + " on site ID : " + siteId + " added to validation queue");
                     validationQueue.add(currTransaction);
@@ -89,23 +85,19 @@ public class TransactionManager{
 
         Thread validation_thread = new Thread(new Runnable() {
             public void run() {
-//                activeThreads.getAndIncrement();
                 while(running){
                     if(!validationQueue.isEmpty()){
                         Transaction validationTrans = validationQueue.poll();
-                        System.out.println(validationTrans.getState());
                         // call dcg function to check if valid -> if false -> we abort restart the transaction, else put in semi-committed state
                         clock.tick();
                         //Transaction present in abort set
                         if(abortSet.contains(validationTrans.getTransactionId())){ abortSet.remove(validationTrans.getTransactionId()); continue;}
                         if(dcg.validateTransaction(validationTrans)){
                             transactionIdMap.put(validationTrans.getTransactionId(), validationTrans);
-//                            semiCommittedTransactions.put(validationTrans.getTransactionId(), semiCommittedTransactions.getOrDefault(validationTrans.getTransactionId(), new AtomicInteger(0)));
                             semiCommittedTransactions.put(validationTrans.getTransactionId(), new AtomicInteger(0));
                             validationTrans.setState(Transaction.STATES.SEMI_COMMITTED);
 
                             validationTrans.setEndTimeStamp(clock.getTime());
-                            //System.out.println("End TS: " + validationTrans.getEndTimeStamp());
                             if(validationTrans.getInitiatingSite() != siteId){
                                 System.out.println("Sie " + siteId + " Sending ack to initiating site : " + validationTrans.getInitiatingSite() + "for transaction " + validationTrans.getTransactionId());
                                 Client client = clientMap.get(validationTrans.getInitiatingSite());
@@ -117,10 +109,9 @@ public class TransactionManager{
                             }
                         }
                         else{
-                            System.out.println("Transaction " + validationTrans.getTransactionId() + " is in aborted state on site " + siteId);
                             // if the transaction's siteId is different, we will send an abort message to the initial site
                             if(validationTrans.getInitiatingSite() != siteId){
-                                System.out.println("Sending abort to all sites");
+                                System.out.println("Sending abort to all sites for transaction " + validationTrans.getTransactionId() + " from site " + siteId);
                                 server.sendAll(Packet.MESSAGES.ABORT, validationTrans);
                                 // send abort to site with the given site id
                             }
@@ -138,7 +129,6 @@ public class TransactionManager{
                         currentTransactions.remove(validationTrans);
                     }
                 }
-//                activeThreads.getAndDecrement();
             }
         });
         validation_thread.start();
@@ -148,10 +138,6 @@ public class TransactionManager{
     public void updateWriteSet(Transaction transaction) {
         ArrayList<ArrayList<Integer>> db = this.database.getDb();
         Map<List<Integer>, Integer> writeSet = transaction.getWriteSet();
-
-//        for(List<Integer> li: writeSet.keySet()){
-//            writeSet.replace(li, db.get(li.get(0)).get(li.get(1)));
-//        }
         transaction.setWriteSet(writeSet);
         clock.tick();
         currentTransactions.add(transaction);
@@ -160,10 +146,7 @@ public class TransactionManager{
     }
 
     public void stop(){
-        System.out.println("In stop on site : " + siteId);
-//        while(!validationQueue.isEmpty())continue;
         while(activeThreads.get() != 0)continue;
-//        System.out.println(validationQueue.poll());
         System.out.println("TM validation thread Stopped");
         System.out.println("TM Time:" + clock.getTime());
         running = false;
@@ -181,12 +164,9 @@ public class TransactionManager{
     public Transaction convertToTransaction(String transaction, ArrayList<ArrayList<Integer>> database){
 
         String[] commands = transaction.split(";");
-
-//        Transaction t = new Transaction(siteId);
         clock.tick();
         Transaction t = new Transaction(siteId, clock.getTime());
         System.out.println("New Transaction with ID: " + t.getTransactionId() + " started on site : " + siteId);
-        System.out.println(transaction);
         boolean transactionStarted = false;
         for(String command: commands){
             if(command.equals("begin")){
@@ -235,7 +215,6 @@ public class TransactionManager{
                             }
 
                             t.appendToWriteSet(Arrays.asList(row,col),value);
-                            System.out.println(row + " " + col + " " + value);
                         }
                         else{
                             System.out.println("Wrong Write syntax");
@@ -248,7 +227,6 @@ public class TransactionManager{
                         if(matcher.find()){
                             waitTime = Integer.parseInt(matcher.group(0));
                         }
-//                        System.out.println(waitTime);
                         try {
                             Thread.sleep(waitTime);
                         } catch (InterruptedException e) {
@@ -282,24 +260,13 @@ public class TransactionManager{
             System.out.println("Adding transaction : " + t.getTransactionId() + "to abort set on site : " + siteId);
             abortSet.add(t.getTransactionId());
         }
-
-//        if(t.getInitiatingSite() == this.siteId){
-//            System.out.println("Transaction with id: " + t.getTransactionId() + " aborted during global validation due to conflicts at TS: "+ clock.getTime());
-//            Transaction restartAbortedTransaction = new Transaction(this.siteId, clock.getTime());
-//            System.out.println("Transaction restarted with TID: " + restartAbortedTransaction.getTransactionId());
-//            restartAbortedTransaction.setReadSet(t.getReadSet());
-//            restartAbortedTransaction.setWriteSet(t.getWriteSet());
-//            updateWriteSet(restartAbortedTransaction);
-//        }
     }
 
     public void globalCommit(Transaction t){
-        System.out.println("Global Committing :" + t.getTransactionId() + " at site: " + this.siteId + " at time: " + this.clock.getTime());
+        System.out.println("=============================================================\nGlobal Committing :" + t.getTransactionId() + " at site: " + this.siteId + " at time: " + this.clock.getTime() + "\n=============================================================");
         semiCommittedTransactions.remove(t.getTransactionId());
         transactionIdMap.remove(t.getTransactionId());
         committedTransactions.add(t);
-
-        System.out.println("Write Set for transaction : " + t.getTransactionId() + " : " + t.getWriteSet());
         t.getWriteSet().forEach((key, val) -> this.database.setDbElement(key.get(0), key.get(1), val));
         clock.tick();
         t.setEndTimeStamp(clock.getTime());
@@ -307,9 +274,4 @@ public class TransactionManager{
         dcg.dcgNodes.add(t.getTransactionId());
         System.out.println("Current Committed Transactions on site " + this.siteId + " : " + committedTransactions);
     }
-
-//    public static void main(String[] args){
-//        TransactionManager t = new TransactionManager(1);
-////        t.convertToTransaction("begin;read(1321,2);wait(5000);write(21,42,245)");
-//    }
 }

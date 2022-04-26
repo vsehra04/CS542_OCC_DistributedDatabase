@@ -31,8 +31,7 @@ public class MultiServer{
         outputStream = new ArrayList<>();
         lock = new ReentrantLock();
     }
-    // my question: should server be on a new thread? because if we are in the main thread, we will never be able to go to the next line
-    // until we connect clients, and to connect clients, we need to go to the next line, therefore deadlocked?!
+
     public void startServer() throws IOException {
         Thread thread = new Thread(new Runnable() {
             @Override
@@ -40,13 +39,11 @@ public class MultiServer{
                 try {
                     serverSocket = new ServerSocket(port);
                     System.out.println("Site " + siteId + " listening for new connections");
-                    // we should probably make this 4 connections (we are assuming no site failure) --> done
                     while (currentConnections < 3) {
-//                        new ClientHandler(serverSocket.accept()).start();
                         startListeningToClient(serverSocket.accept());
-                        System.out.println("Site " + siteId + " accepted a connection");
                         ++currentConnections;
                     }
+                    System.out.println("Site " + siteId + " is ready");
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -72,16 +69,12 @@ public class MultiServer{
                         Packet request = new Packet((Packet)is.readObject());
                         if(request.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
                         else if(request.getMessage() == Packet.MESSAGES.ACK){
-                            System.out.println("Ack message received from a site ID " + request.getSiteId() + " for transaction: " + request.getTransaction().getTransactionId());
-                            // acknowledgement message received
-                            System.out.println("Server site ID : " + siteId);
+                            System.out.println("Ack message received from a site ID " + request.getSiteId() + " for transaction: " + request.getTransaction().getTransactionId() + "at site id " + siteId);
                             lock.lock();
                             try {
                                 int count = serverTM.incrementAndGetSemiCommittedTransactions(request.getTransaction());
-                                System.out.println("COUNT: " + count);
                                 serverTM.getClock().updateTime((int) request.getTime());
                                 if (count == 3) {
-                                    System.out.println("Count 3!!!");
                                     sendAll(Packet.MESSAGES.GLOBAL_COMMIT, request.getTransaction());
                                 }
                             }
@@ -91,14 +84,9 @@ public class MultiServer{
                         }
                     }
 
-//                    os.close();
-//                    is.close();
-//                    cs.close();
                 } catch (IOException | ClassNotFoundException e) {
                     e.printStackTrace();
                 }
-
-
             }
         });
         thread.start();
@@ -108,7 +96,6 @@ public class MultiServer{
         for(int i=0;i<clientSocket.size();i++){
             try {
                 Packet packet = new Packet(serverTM.getClock().getTime(), transaction, message, siteId);
-                //System.out.println(packet);
                 outputStream.get(i).writeObject(packet);
                 outputStream.get(i).flush();
             } catch (IOException e) {
@@ -119,26 +106,18 @@ public class MultiServer{
     public void sendAll(Packet.MESSAGES message, Transaction transaction) {
         if(message == Packet.MESSAGES.GLOBAL_COMMIT){
             serverTM.globalCommit(transaction);
-            System.out.println("SENDING GLOBAL COMMIT TO ALL SITES FOR TRANSACTION ID: " + transaction.getTransactionId());
+            System.out.println("Sending global commit to all sited for transaction : " + transaction.getTransactionId());
             sendPacket(transaction, message);
         }
         else if(message == Packet.MESSAGES.VALIDATE){
-            System.out.println("SENDING VALIDATE TO ALL SITES FOR TRANSACTION ID: " + transaction.getTransactionId());
+            System.out.println("Sending validate to all sited for transaction : " + transaction.getTransactionId());
             sendPacket(transaction, message);
         }
         else if(message == Packet.MESSAGES.ABORT){
-            System.out.println("SENDING ABORT TO ALL SITES FOR TRANSACTION ID: " + transaction.getTransactionId());
+            System.out.println("Sending abort to all sited for transaction : " + transaction.getTransactionId());
             sendPacket(transaction, message);
         }
     }
-
-//    public void run(){
-//        try {
-//            startServer();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     public void stop() throws IOException {
         serverSocket.close();

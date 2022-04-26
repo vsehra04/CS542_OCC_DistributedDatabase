@@ -25,13 +25,10 @@ public class Site implements Runnable{
     //Constructor
     public Site(int siteID, int numTables, int numRecords, int port){
         this.siteID = siteID;
-//        this.database = getRandomArray(numTables, numRecords);
         this.database = new Database(numTables, numRecords);
         this.tm = new TransactionManager(siteID, this.database);
         this.clock = new LamportClock(0);
-//        this.client = new Client(ip, port, siteID, tm);
         this.server = new MultiServer(siteID, tm, port);
-//        tm.startValidationThread(clock);
     }
 
     //Fetch the SiteID
@@ -47,15 +44,12 @@ public class Site implements Runnable{
     public void QueueTransaction(String t){
         clock.tick();
         this.transactionQueue.add(t);
-//        System.out.println(t);
     }
 
     //Thread to check whether the transaction queue on site is empty
     public void run() {
         while (running) {
             if(!transactionQueue.isEmpty()) {
-//                System.out.println("top: " + transactionQueue.peek());
-//                System.out.println("current trans: " + transactionQueue.peek());
                 clock.tick();
                 tm.getTransaction(transactionQueue.poll(), database.getDb());
             }
@@ -87,7 +81,6 @@ public class Site implements Runnable{
     void transactionsDone(Site s){
         s.stop();
         tm.stop();
-        //System.out.println("Site Time:" + clock.getTime());
         try {
             server.stop();
         } catch (IOException e) {
@@ -131,45 +124,8 @@ public class Site implements Runnable{
     }
 
     public void setupServerClient(List<String> ipList, List<Integer> portList){
-//        startServer();
         setClientList(connectClientToServers(ipList, portList));
         startTMOperations();
         startThread();
     }
-
-//    public static void main(String[] args){
-//        Site s = new Site(1, 10000, 10000, 5700);
-//        // to do: write server.start() which will listen for connections -> this probably has to be done in a new thread
-//        // for client -> write connectToServer which will keep on trying to connect to server until it gets connected
-////        s.startServer();
-////        s.setClientList(s.connectClientToServers(Arrays.asList("1", "2", "3"), Arrays.asList(1,2,3)));
-//        // once all the clients are connected to different servers start tm thread and send tm all these values
-////        s.startTMOperations();
-////        s.startThread();
-//
-////        s.setupServerClient(s, Arrays.asList("1", "2", "3"), Arrays.asList(1,2,3));
-//
-//
-//        String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
-//        s.QueueTransaction(t1, s.transactionQueue);
-//
-//        String t2 = "begin;read(2000,2);wait(2000);read(20,100);write(1,2,100)";
-//        s.QueueTransaction(t2, s.transactionQueue);
-//        String t3 = "begin;read(3000,3);wait(3000);write(1000,1,30);read(1,2)";
-//        s.QueueTransaction(t3, s.transactionQueue);
-//
-//        String t4 = "begin;read(4000,4);wait(3020);write(1000,1,30)";
-//        s.QueueTransaction(t4, s.transactionQueue);
-//
-//        s.pause();
-////
-//
-////
-////        String t5 = "begin;read(1,1);fail();write(1,1,56)";
-////        s.QueueTransaction(t5, s.transactionQueue);
-//
-//        s.transactionsDone(s);
-//
-//    }
-
 }

@@ -41,13 +41,9 @@ public class Client implements Runnable{
     }
 
     public Packet sendMessage(Packet packet) {
-//        out.println(msg);
-//        String resp = in.readLine();
-//        return resp;
-        //if(packet instanceof Packet) System.out.println(packet);
         try {
             outputStream.writeObject(packet);
-            outputStream.flush(); // not sure if needed or not
+            outputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -67,40 +63,35 @@ public class Client implements Runnable{
         while(running){
             try {
                 Object obj = inputStream.readObject();
-                if(!(obj instanceof Packet)) {System.out.println("Object : " + obj);continue;}
+                if(!(obj instanceof Packet)) {continue;}
                 Packet response = (Packet)obj;
-                System.out.println("Site id: " + this.initiatingSite);
                 if(response.getMessage() == Packet.MESSAGES.SHUT_DOWN)break;
                 else if(response.getMessage() == Packet.MESSAGES.VALIDATE){
-                    System.out.println("On site : " + clientTM.getSiteId() + " adding transaction : " + response.getTransaction() + " to Validation Queue ");
+                    System.out.println("On site : " + clientTM.getSiteId() + " adding transaction : " + response.getTransaction().getTransactionId() + " to Validation Queue ");
                     clientTM.getClock().updateTime((int) response.getTime());
                     clientTM.addToValidationQueue(response.getTransaction());
                 }
                 else if(response.getMessage() == Packet.MESSAGES.ABORT){
-                    System.out.println("On site : " + clientTM.getSiteId() + " aborting transaction " + response.getTransaction());
+                    System.out.println("On site : " + clientTM.getSiteId() + " aborting transaction " + response.getTransaction().getTransactionId());
                     clientTM.getClock().updateTime((int) response.getTime());
                     clientTM.abortTransaction(response.getTransaction());
                     if(clientTM.getSiteId() == response.getTransaction().getInitiatingSite()){
                         // restart transaction
                         Transaction t = response.getTransaction();
-                        System.out.println("On site : " + clientTM.getSiteId() + "Transaction with id: " + t.getTransactionId() + " aborted during global validation at TS: "+ clientTM.getClock().getTime());
+                        System.out.println("On site : " + clientTM.getSiteId() + " Transaction with id: " + t.getTransactionId() + " aborted during global validation at TS: "+ clientTM.getClock().getTime());
                         Transaction restartAbortedTransaction = new Transaction(clientTM.getSiteId(), clientTM.getClock().getTime());
-                        System.out.println("On site : " + clientTM.getSiteId() + "Transaction restarted with TID: " + restartAbortedTransaction.getTransactionId());
+                        System.out.println("On site : " + clientTM.getSiteId() + " Transaction restarted with TID: " + restartAbortedTransaction.getTransactionId());
                         restartAbortedTransaction.setReadSet(t.getReadSet());
                         restartAbortedTransaction.setWriteSet(t.getWriteSet());
                         clientTM.updateWriteSet(restartAbortedTransaction);
                     }
                 }
                 else if(response.getMessage() == Packet.MESSAGES.GLOBAL_COMMIT){
-                    System.out.println("On site : " + clientTM.getSiteId() + "Global Commit the transaction : " + response.getTransaction());
+                    System.out.println("On site : " + clientTM.getSiteId() + " Global Commit the transaction : " + response.getTransaction().getTransactionId());
                     clientTM.getClock().updateTime((int) response.getTime());
                     clientTM.globalCommit(response.getTransaction());
                 }
             }
-//            catch(StreamCorruptedException sce){
-//                System.out.println("Stream Corrupted Exception");
-//                continue;
-//            }
             catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
