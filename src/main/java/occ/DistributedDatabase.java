@@ -53,7 +53,7 @@ public class DistributedDatabase {
                    continue;
                }
                else{
-                   System.out.println("F");
+                   System.out.println("Not consistent");
                }
             }
         }

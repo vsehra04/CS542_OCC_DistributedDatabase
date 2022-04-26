@@ -272,6 +272,10 @@ public class TransactionManager{
         t.setEndTimeStamp(clock.getTime());
         dcg.dcgNodes.remove(t.getTransactionId());
         dcg.dcgNodes.add(t.getTransactionId());
-        System.out.println("Current Committed Transactions on site " + this.siteId + " : " + committedTransactions);
+        List<UUID> committedTransactionID = new ArrayList<>();
+        for(Transaction trans : committedTransactions){
+            committedTransactionID.add(trans.getTransactionId());
+        }
+        System.out.println("Current Committed Transactions on site " + this.siteId + " : " + committedTransactionID);
     }
 }
