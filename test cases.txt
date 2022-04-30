@@ -1,0 +1,107 @@
+
+
+1) WRITE CONFLICTS
+	String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
+	s1.QueueTransaction(t1);
+
+	String t2 = "begin;read(1000,1);wait(2000);write(30,100,10);";
+	s2.QueueTransaction(t2);
+
+
+
+
+2) READ-WRITE CONFLICT
+
+	String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(3000,3,10);";
+	s4.QueueTransaction(t1);
+
+	String t2 = "begin;read(3000,3);wait(1100);write(1000,1,30);read(1,2)";
+	s3.QueueTransaction(t2);
+
+
+
+3) cycle of 3 - LOCAL
+
+	String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(3000,3,10);";
+	s1.QueueTransaction(t1);
+
+	String t2 = "begin;read(3000,3);wait(1000);write(100,1,30);read(1,2)";
+	s1.QueueTransaction(t2);
+
+	String t3 = "begin;read(100,1);wait(1000);write(1000,1,30);read(1,2)";
+	s1.QueueTransaction(t3);
+
+
+	String t4 = "begin;read(50,3);wait(1000);write(200,12,14);read(14,24)";
+	s2.QueueTransaction(t4);
+
+
+
+4) CYCLE OF 3 - GLOBAL 
+
+	String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(3000,3,10);";
+	s1.QueueTransaction(t1);
+
+	String t2 = "begin;read(3000,3);wait(1500);write(100,1,30);read(1,2)";
+	s2.QueueTransaction(t2);
+
+	String t3 = "begin;read(100,1);wait(2000);write(1000,1,30);read(1,2)";
+	s3.QueueTransaction(t3);
+
+
+	String t4 = "begin;read(50,3);wait(1000);write(200,12,14);read(14,24)";
+	s2.QueueTransaction(t4);
+
+
+5) MULTICYCLE - GLOBAL
+
+	case 1- only t1 aborts
+
+	String t1 = "begin;read(1000,1);read(56,50);write(20,30,57);wait(3500);read(20,100);write(10,100,10);write(20,100,10);write(3000,3,10);";
+	s1.QueueTransaction(t1);
+
+	String t2 = "begin;read(3000,3);wait(1700);write(100,1,30);read(1,2)";
+	s2.QueueTransaction(t2);
+
+	String t3 = "begin;read(100,1);wait(2000);write(1000,1,30);read(1,2)";
+	s3.QueueTransaction(t3);
+
+	String t4 = "begin;read(1,1);wait(2500);read(20,100);write(56,50,77);write(123,789,55);write(308,36,18);";
+	s4.QueueTransaction(t4);
+
+	String t5 = "begin;read(55,55);wait(1500);write(1,1,124);read(20,30)";
+	s2.QueueTransaction(t5);
+
+
+	case 2- 2 transactions abort (t4, t3 aborts)
+
+	String t1 = "begin;read(1000,1);read(56,50);write(20,30,57);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(3000,3,10);";
+	s1.QueueTransaction(t1);
+
+	String t2 = "begin;read(3000,3);wait(1700);write(100,1,30);read(1,2)";
+	s2.QueueTransaction(t2);
+
+	String t3 = "begin;read(100,1);wait(2000);write(1000,1,30);read(1,2)";
+	s3.QueueTransaction(t3);
+
+	String t4 = "begin;read(1,1);wait(2500);read(20,100);write(56,50,77);write(123,789,55);write(308,36,18);";
+	s4.QueueTransaction(t4);
+
+	String t5 = "begin;read(55,55);wait(1500);write(1,1,124);read(20,30)";
+	s2.QueueTransaction(t5);
+
+
+
+6) No aborts occur
+	
+	String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(3000,3,10);";
+	s4.QueueTransaction(t1);
+
+	String t2 = "begin;read(3000,3);wait(1000);write(2000,1,30);read(1,2)";
+	s3.QueueTransaction(t2);
+
+	String t3 = "begin;read(56,34);wait(1000);write(3000,1,30);read(14,24)";
+	s1.QueueTransaction(t3);
+
+	String t4 = "begin;read(67,11);wait(1000);write(31,2,50);read(157,256)";
+	s2.QueueTransaction(t4);
