@@ -32,14 +32,14 @@ public class DistributedDatabase {
 
         s4.setupServerClient(Arrays.asList("127.0.0.1","127.0.0.1","127.0.0.1"), Arrays.asList(server1, server2, server3));
 
-        String t1 = "begin;read(1000,1);wait(1000);read(20,100);write(10,100,10);write(20,100,10);write(30,100,10);";
-        s1.QueueTransaction(t1);
 
-        String t2 = "begin;read(1000,1);wait(2000);write(30,100,10);";
-        s2.QueueTransaction(t2);
+        //Insert test cases here
 
 
-        Site.pause(100000);
+        //End test cases
+
+
+        Site.pause(10000000);
 
 
         ArrayList<ArrayList<Integer>> s1_db =  s1.getDatabase().getDb();
