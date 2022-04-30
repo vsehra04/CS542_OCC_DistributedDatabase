@@ -5,7 +5,7 @@ In this project an optimistic approach to concurrency control has been imple- me
 ## Get Started
 - Download or clone this git repository.
 - Open the project using any IDE and make sure all the requirements and dependencies stated below are satisfied.
-- In <a href="https://github.com/vsehra04/CS542_OCC_DistributedDatabase/blob/main/src/main/java/occ/DistributedDatabase.java">DistributedDatabase.java</a> include the desired test cases in the given space. Sample test cases have been provided <a href="https://github.com/vsehra04/CS542_OCC_DistributedDatabase/blob/main/test%20cases.txt">here</a>.
+- In <a href="https://github.com/vsehra04/CS542_OCC_DistributedDatabase/blob/main/src/main/java/occ/DistributedDatabase.java">DistributedDatabase.java</a> include the desired test cases in the given space. Sample test cases have been provided <a href="https://github.com/vsehra04/CS542_OCC_DistributedDatabase/blob/main/test%20cases.txt">here</a>(text cases.txt).
 - Build and run DistributedDatabase.java
 - Note : Make sure to stop the code after getting the desired result as the program will not stop on its own.
 
