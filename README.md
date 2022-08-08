@@ -1,6 +1,6 @@
 # Local and Global Validation for Optimistic Concurrency Control in a Distributed-Database System
 
-In this project an optimistic approach to concurrency control has been imple- mented. We have simulated a Distributed system by creating four sites having a fully replicated database and implemented local and global validation. In order to achieve this task, we have made use of data-structures like Dynamic Conflict Graphs, set of committed semi-committed and active transactions at each site. The project that we have created will be able to handle multiple concurrent transactions at different sites and will still leave the database at every site in a consistent state.
+In this project an optimistic approach to concurrency control has been implemented. We have simulated a Distributed system by creating four sites having a fully replicated database and implemented local and global validation. In order to achieve this task, we have made use of data-structures like Dynamic Conflict Graphs, set of committed semi-committed and active transactions at each site. The project that we have created will be able to handle multiple concurrent transactions at different sites and will still leave the database at every site in a consistent state.
 
 ## Get Started
 - Download or clone this git repository.
